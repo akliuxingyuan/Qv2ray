@@ -48,7 +48,7 @@ void StreamSettingsWidget::SetStreamObject(const StreamSettingsObject &sso)
             disableSystemRoot->setChecked(stream.tlsSettings.disableSystemRoot);
             alpnTxt->setText(stream.tlsSettings.alpn.join("|"));
         } else if (stream.security == "reality") {
-            serverNameTxt->setText(stream.realitySettings.serverName);
+            realityServerNameTxt->setText(stream.realitySettings.serverName);
             printDebugLog->setChecked(stream.realitySettings.show);
             fingerprint->setText(stream.realitySettings.fingerprint);
             publicKey->setText(stream.realitySettings.publicKey);
