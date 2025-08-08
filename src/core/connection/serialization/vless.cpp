@@ -213,6 +213,7 @@ namespace Qv2ray::core::connection
             // assembling config
             CONFIGROOT root;
             outbound["streamSettings"] = stream;
+            outbound["tag"] = OUTBOUND_TAG_PROXY;
             root["outbounds"] = QJsonArray{ outbound };
 
             // return
