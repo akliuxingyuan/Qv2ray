@@ -33,9 +33,9 @@ void StreamSettingsWidget::SetStreamObject(const StreamSettingsObject &sso)
 {
     stream = sso;
     transportCombo->setCurrentText(stream.network);
-    // TLS XTLS
+    // TLS XTLS REALITY
     {
-        const static QMap<QString, int> securityIndexMap{ { "none", 0 }, { "tls", 1 }, { "xtls", 2 } };
+        const static QMap<QString, int> securityIndexMap{ { "none", 0 }, { "tls", 1 }, { "xtls", 2 }, { "reality", 3 } };
         if (securityIndexMap.contains(stream.security))
             securityTypeCB->setCurrentIndex(securityIndexMap[stream.security]);
         else
@@ -50,10 +50,21 @@ void StreamSettingsWidget::SetStreamObject(const StreamSettingsObject &sso)
         alpnTxt->setText(stream.prefix##Settings.alpn.join("|"));                                                                                    \
     }
 
-        tls_xtls_process(tls);
-
-        if (stream.security == "xtls")
+#define reality_porcess(prefix)                                                                                                                      \
+    {                                                                                                                                                \
+        serverNameTxt->setText(stream.prefix##Settings.serverName);                                                                                  \
+        printDebugLog->setChecked(stream.prefix##Settings.show);                                                                                     \
+        fingerprint->setText(stream.prefix##Settings.fingerprint);                                                                                   \
+        publicKey->setText(stream.prefix##Settings.publicKey);                                                                                       \
+        shortId->setText(stream.prefix##Settings.shortId);                                                                                           \
+        spiderX->setText(stream.prefix##Settings.spiderX);                                                                                           \
+    }
+        if (stream.security == "tls") {
+            tls_xtls_process(tls);
+        } else if (stream.security == "xtls") {
             tls_xtls_process(xtls);
+        } else if (stream.security == "reality")
+            reality_porcess(reality);
     }
     // TCP
     {
@@ -295,8 +306,13 @@ void StreamSettingsWidget::on_securityTypeCB_currentIndexChanged(int arg1)
 //
 void StreamSettingsWidget::on_serverNameTxt_textEdited(const QString &arg1)
 {
-    stream.tlsSettings.serverName = arg1.trimmed();
-    stream.xtlsSettings.serverName = arg1.trimmed();
+    if (stream.security == "tls") {
+        stream.tlsSettings.serverName = arg1.trimmed();
+    } else if (stream.security == "xtls") {
+        stream.xtlsSettings.serverName = arg1.trimmed();
+    } else if (stream.security == "reality") {
+        stream.realitySettings.serverName = arg1.trimmed();
+    }
 }
 
 void StreamSettingsWidget::on_allowInsecureCB_stateChanged(int arg1)
@@ -392,4 +408,26 @@ void StreamSettingsWidget::on_httpHeadersEditBtn_clicked()
     auto json = HttpObject().toJson();
     json["headers"] = rJson;
     stream.httpSettings.headers = HttpObject::fromJson(json).headers;
+}
+
+
+void StreamSettingsWidget::on_printDebugLog_stateChanged(int arg1)
+{
+    stream.realitySettings.show = arg1 == Qt::Checked;
+}
+void StreamSettingsWidget::on_fingerprint_textEdited(const QString &arg1)
+{
+    stream.realitySettings.fingerprint = arg1;
+}
+void StreamSettingsWidget::on_publicKey_textEdited(const QString &arg1)
+{
+    stream.realitySettings.publicKey = arg1;
+}
+void StreamSettingsWidget::on_shortId_textEdited(const QString &arg1)
+{
+    stream.realitySettings.shortId = arg1;
+}
+void StreamSettingsWidget::on_spiderX_textEdited(const QString &arg1)
+{
+    stream.realitySettings.spiderX = arg1;
 }

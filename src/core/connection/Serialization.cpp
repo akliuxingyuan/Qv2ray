@@ -12,7 +12,7 @@ namespace Qv2ray::core::connection
         {
             const auto TLSOptionsFilter = [](QJsonObject &conf) {
                 const auto disableSystemRoot = GlobalConfig.advancedConfig.disableSystemRoot;
-                for (const QString &prefix : { "tls", "xtls" })
+                for (const QString &prefix : { "tls", "xtls", "reality" })
                     QJsonIO::SetValue(conf, disableSystemRoot, { "outbounds", 0, "streamSettings", prefix + "Settings", "disableSystemRoot" });
             };
 
