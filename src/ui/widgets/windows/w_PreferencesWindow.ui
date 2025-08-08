@@ -420,7 +420,7 @@ For example, for updating subscriptions.</string>
               </item>
               <item>
                <property name="text">
-                <string notr="true">Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0</string>
+                <string notr="true">Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0</string>
                </property>
               </item>
               <item>
