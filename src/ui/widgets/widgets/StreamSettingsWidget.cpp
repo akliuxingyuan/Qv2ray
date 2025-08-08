@@ -35,7 +35,7 @@ void StreamSettingsWidget::SetStreamObject(const StreamSettingsObject &sso)
     transportCombo->setCurrentText(stream.network);
     // TLS/REALITY
     {
-        const static QMap<QString, int> securityIndexMap{ { "none", 0 }, { "tls", 1 }, { "reality", 3 } };
+        const static QMap<QString, int> securityIndexMap{ { "none", 0 }, { "tls", 1 }, { "reality", 2 } };
         if (securityIndexMap.contains(stream.security))
             securityTypeCB->setCurrentIndex(securityIndexMap[stream.security]);
         else
