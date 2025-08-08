@@ -188,7 +188,7 @@ namespace Qv2ray::core::connection
             {
                 return {};
             }
-            bool hasTLS = stream.security == "tls" || stream.security == "xtls";
+            bool hasTLS = stream.security == "tls";
             auto protocol = stream.network;
             if (hasTLS)
                 protocol += "+tls";
@@ -196,11 +196,6 @@ namespace Qv2ray::core::connection
             {
                 if (!stream.tlsSettings.serverName.isEmpty())
                     query.addQueryItem("tlsServerName", stream.tlsSettings.serverName);
-            }
-            else if (stream.security == "xtls")
-            {
-                if (!stream.xtlsSettings.serverName.isEmpty())
-                    query.addQueryItem("tlsServerName", stream.xtlsSettings.serverName);
             }
             url.setPath("/");
             url.setScheme("vmess");

@@ -33,39 +33,30 @@ void StreamSettingsWidget::SetStreamObject(const StreamSettingsObject &sso)
 {
     stream = sso;
     transportCombo->setCurrentText(stream.network);
-    // TLS XTLS REALITY
+    // TLS/REALITY
     {
-        const static QMap<QString, int> securityIndexMap{ { "none", 0 }, { "tls", 1 }, { "xtls", 2 }, { "reality", 3 } };
+        const static QMap<QString, int> securityIndexMap{ { "none", 0 }, { "tls", 1 }, { "reality", 3 } };
         if (securityIndexMap.contains(stream.security))
             securityTypeCB->setCurrentIndex(securityIndexMap[stream.security]);
         else
             LOG("Unsupported Security Type:", stream.security);
 
-#define tls_xtls_process(prefix)                                                                                                                     \
-    {                                                                                                                                                \
-        serverNameTxt->setText(stream.prefix##Settings.serverName);                                                                                  \
-        allowInsecureCB->setChecked(stream.prefix##Settings.allowInsecure);                                                                          \
-        enableSessionResumptionCB->setChecked(stream.prefix##Settings.enableSessionResumption);                                                      \
-        disableSystemRoot->setChecked(stream.prefix##Settings.disableSystemRoot);                                                                    \
-        alpnTxt->setText(stream.prefix##Settings.alpn.join("|"));                                                                                    \
+        if (stream.security == "tls") {
+            serverNameTxt->setText(stream.tlsSettings.serverName);
+            allowInsecureCB->setChecked(stream.tlsSettings.allowInsecure);
+            enableSessionResumptionCB->setChecked(stream.tlsSettings.enableSessionResumption);
+            disableSystemRoot->setChecked(stream.tlsSettings.disableSystemRoot);
+            alpnTxt->setText(stream.tlsSettings.alpn.join("|"));
+        } else if (stream.security == "reality") {
+            serverNameTxt->setText(stream.realitySettings.serverName);
+            printDebugLog->setChecked(stream.realitySettings.show);
+            fingerprint->setText(stream.realitySettings.fingerprint);
+            publicKey->setText(stream.realitySettings.publicKey);
+            shortId->setText(stream.realitySettings.shortId);
+            spiderX->setText(stream.realitySettings.spiderX);
+        }
     }
 
-#define reality_porcess(prefix)                                                                                                                      \
-    {                                                                                                                                                \
-        serverNameTxt->setText(stream.prefix##Settings.serverName);                                                                                  \
-        printDebugLog->setChecked(stream.prefix##Settings.show);                                                                                     \
-        fingerprint->setText(stream.prefix##Settings.fingerprint);                                                                                   \
-        publicKey->setText(stream.prefix##Settings.publicKey);                                                                                       \
-        shortId->setText(stream.prefix##Settings.shortId);                                                                                           \
-        spiderX->setText(stream.prefix##Settings.spiderX);                                                                                           \
-    }
-        if (stream.security == "tls") {
-            tls_xtls_process(tls);
-        } else if (stream.security == "xtls") {
-            tls_xtls_process(xtls);
-        } else if (stream.security == "reality")
-            reality_porcess(reality);
-    }
     // TCP
     {
         tcpHeaderTypeCB->setCurrentText(stream.tcpSettings.header.type);
@@ -301,47 +292,33 @@ void StreamSettingsWidget::on_securityTypeCB_currentIndexChanged(int arg1)
     stream.security = securityTypeCB->itemText(arg1).toLower();
 }
 
-//
-// Dirty hack, since XTLSSettings are the same as TLSSettings (Split them if required in the future)
-//
 void StreamSettingsWidget::on_serverNameTxt_textEdited(const QString &arg1)
 {
-    if (stream.security == "tls") {
-        stream.tlsSettings.serverName = arg1.trimmed();
-    } else if (stream.security == "xtls") {
-        stream.xtlsSettings.serverName = arg1.trimmed();
-    } else if (stream.security == "reality") {
-        stream.realitySettings.serverName = arg1.trimmed();
-    }
+    stream.tlsSettings.serverName = arg1.trimmed();
 }
 
 void StreamSettingsWidget::on_allowInsecureCB_stateChanged(int arg1)
 {
     stream.tlsSettings.allowInsecure = arg1 == Qt::Checked;
-    stream.xtlsSettings.allowInsecure = arg1 == Qt::Checked;
 }
 
 void StreamSettingsWidget::on_enableSessionResumptionCB_stateChanged(int arg1)
 {
     stream.tlsSettings.enableSessionResumption = arg1 == Qt::Checked;
-    stream.xtlsSettings.enableSessionResumption = arg1 == Qt::Checked;
 }
 
 void StreamSettingsWidget::on_alpnTxt_textEdited(const QString &arg1)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     stream.tlsSettings.alpn = arg1.split('|', Qt::SplitBehaviorFlags::SkipEmptyParts);
-    stream.xtlsSettings.alpn = arg1.split('|', Qt::SplitBehaviorFlags::SkipEmptyParts);
 #else
     stream.tlsSettings.alpn = arg1.split('|', QString::SkipEmptyParts);
-    stream.xtlsSettings.alpn = arg1.split('|', QString::SkipEmptyParts);
 #endif
 }
 
 void StreamSettingsWidget::on_disableSystemRoot_stateChanged(int arg1)
 {
     stream.tlsSettings.disableSystemRoot = arg1;
-    stream.xtlsSettings.disableSystemRoot = arg1;
 }
 
 void StreamSettingsWidget::on_openCertEditorBtn_clicked()
@@ -418,6 +395,10 @@ void StreamSettingsWidget::on_printDebugLog_stateChanged(int arg1)
 void StreamSettingsWidget::on_fingerprint_textEdited(const QString &arg1)
 {
     stream.realitySettings.fingerprint = arg1;
+}
+void StreamSettingsWidget::on_realityServerNameTxt_textEdited(const QString &arg1)
+{
+    stream.realitySettings.serverName = arg1.trimmed();
 }
 void StreamSettingsWidget::on_publicKey_textEdited(const QString &arg1)
 {

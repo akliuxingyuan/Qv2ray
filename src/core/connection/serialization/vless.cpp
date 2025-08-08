@@ -159,7 +159,7 @@ namespace Qv2ray::core::connection
             // tls-wise settings
             const auto hasSecurity = query.hasQueryItem("security");
             const auto security = hasSecurity ? query.queryItemValue("security") : "none";
-            const auto tlsKey = security == "xtls" ? "xtlsSettings" : (security == "tls" ? "tlsSettings" : "realitySettings");
+            const auto tlsKey = security == "tls" ? "tlsSettings" : "realitySettings";
             if (security != "none")
             {
                 QJsonIO::SetValue(stream, security, "security");
@@ -179,15 +179,13 @@ namespace Qv2ray::core::connection
                 const auto alpnArray = QJsonArray::fromStringList(alpnRaw.split(","));
                 QJsonIO::SetValue(stream, alpnArray, { tlsKey, "alpn" });
             }
-            // xtls-specific
-            if (security == "xtls" || security == "reality")
+            if (security == "reality")
             {
+                // flow
                 const auto flow = query.queryItemValue("flow");
                 QJsonIO::SetValue(outbound, flow, { "settings", "vnext", 0, "users", 0, "flow" });
-            }
 
-            if ( security == "reality" )
-            {
+                // reality settings
                 if (query.hasQueryItem("fp"))
                 {
                     const auto fp = QUrl::fromPercentEncoding(query.queryItemValue("fp").toUtf8());
@@ -208,6 +206,8 @@ namespace Qv2ray::core::connection
                     const auto sid = QUrl::fromPercentEncoding(query.queryItemValue("sid").toUtf8());
                     QJsonIO::SetValue(stream, sid, { "realitySettings", "shortId" });
                 }
+            } else if (security == "tls") {
+                // TODO: tls options
             }
 
             // assembling config
