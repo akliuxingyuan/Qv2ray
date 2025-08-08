@@ -176,11 +176,13 @@ namespace Qv2ray::core::kernel
             QProcess process;
             process.setProcessEnvironment(env);
             DEBUG("Starting V2Ray core with test options");
-#ifdef QV2RAY_USE_V5_CORE
-            process.start(kernelPath, { "test", "-c", path }, QIODevice::ReadWrite | QIODevice::Text);
-#else
-            process.start(kernelPath, { "-test", "-config", path }, QIODevice::ReadWrite | QIODevice::Text);
-#endif
+            if (msg.value().contains("V2Ray 5")){
+                process.start(kernelPath, { "test", "-c", path }, QIODevice::ReadWrite | QIODevice::Text);
+            } else if(msg.value().contains("Xray")) {
+                process.start(kernelPath, { "run", "-test", "-config", path }, QIODevice::ReadWrite | QIODevice::Text);
+            } else {
+                process.start(kernelPath, { "-test", "-config", path }, QIODevice::ReadWrite | QIODevice::Text);
+            }
             process.waitForFinished();
 
             if (process.exitCode() != 0)
