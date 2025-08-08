@@ -59,17 +59,17 @@ namespace Qv2ray::core::connection::generation::routing
             if (!routeConfig.domains.block.isEmpty())
                 rulesList << GenerateSingleRouteRule(RULE_DOMAIN, routeConfig.domains.block, OUTBOUND_TAG_BLACKHOLE);
             //
-            // Proxied
-            if (!routeConfig.ips.proxy.isEmpty())
-                rulesList << GenerateSingleRouteRule(RULE_IP, routeConfig.ips.proxy, outTag);
-            if (!routeConfig.domains.proxy.isEmpty())
-                rulesList << GenerateSingleRouteRule(RULE_DOMAIN, routeConfig.domains.proxy, outTag);
-            //
             // Directed
             if (!routeConfig.ips.direct.isEmpty())
                 rulesList << GenerateSingleRouteRule(RULE_IP, routeConfig.ips.direct, OUTBOUND_TAG_DIRECT);
             if (!routeConfig.domains.direct.isEmpty())
                 rulesList << GenerateSingleRouteRule(RULE_DOMAIN, routeConfig.domains.direct, OUTBOUND_TAG_DIRECT);
+            //
+            // Proxied
+            if (!routeConfig.ips.proxy.isEmpty())
+                rulesList << GenerateSingleRouteRule(RULE_IP, routeConfig.ips.proxy, outTag);
+            if (!routeConfig.domains.proxy.isEmpty())
+                rulesList << GenerateSingleRouteRule(RULE_DOMAIN, routeConfig.domains.proxy, outTag);
             //
             // Check if CN needs proxy, or direct.
             if (bypassCN)
