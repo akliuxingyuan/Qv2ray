@@ -12,7 +12,9 @@ namespace Qv2ray::core::connection
         {
             const auto TLSOptionsFilter = [](QJsonObject &conf) {
                 const auto disableSystemRoot = GlobalConfig.advancedConfig.disableSystemRoot;
-                QJsonIO::SetValue(conf, disableSystemRoot, { "outbounds", 0, "streamSettings", "tlsSettings", "disableSystemRoot" });
+                if (disableSystemRoot == true) {
+                    QJsonIO::SetValue(conf, disableSystemRoot, { "outbounds", 0, "streamSettings", "tlsSettings", "disableSystemRoot" });
+                }
             };
 
             QList<std::pair<QString, CONFIGROOT>> connectionConf;
@@ -31,6 +33,12 @@ namespace Qv2ray::core::connection
             else if (link.startsWith("vmess://"))
             {
                 auto conf = vmess::Deserialize(link, aliasPrefix, errMessage);
+                TLSOptionsFilter(conf);
+                connectionConf << std::pair{ *aliasPrefix, conf };
+            }
+            else if (link.startsWith("trojan://"))
+            {
+                auto conf = trojan::Deserialize(link, aliasPrefix, errMessage);
                 TLSOptionsFilter(conf);
                 connectionConf << std::pair{ *aliasPrefix, conf };
             }
@@ -107,6 +115,12 @@ namespace Qv2ray::core::connection
             {
                 auto ssServer = ShadowSocksServerObject::fromJson(settings["servers"].toArray().first().toObject());
                 sharelink = ss::Serialize(ssServer, alias, isSip002);
+            }
+            else if (type == "trojan")
+            {
+                auto trojanServer = TrojanServerObject::fromJson(settings["servers"].toArray().first().toObject());
+                const auto streamSettingsObj = StreamSettingsObject::fromJson(streamSettings);
+                sharelink = trojan::Serialize(streamSettingsObj, trojanServer, alias);
             }
             else
             {
