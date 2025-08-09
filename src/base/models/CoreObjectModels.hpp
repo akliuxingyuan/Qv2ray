@@ -362,10 +362,47 @@ namespace Qv2ray::base::objects
         JSONSTRUCT_COMPARE(FakeDNSObject, ipPool, poolSize)
     };
 
-    //
-    // Some protocols from: https://v2ray.com/chapter_02/02_protocols.html
     namespace protocol
     {
+        struct HTTPSOCKSUserObject
+        {
+            QString user;
+            QString pass;
+            int level = 0;
+            JSONSTRUCT_COMPARE(HTTPSOCKSUserObject, user, pass, level)
+            JSONSTRUCT_REGISTER(HTTPSOCKSUserObject, F(user, pass, level))
+        };
+        //
+        // Socks, OutBound
+        struct SocksServerObject
+        {
+            QString address = "0.0.0.0";
+            int port = 0;
+            QList<HTTPSOCKSUserObject> users;
+            JSONSTRUCT_COMPARE(SocksServerObject, address, port, users)
+            JSONSTRUCT_REGISTER(SocksServerObject, F(address, port, users))
+        };
+        //
+        // Http, OutBound
+        struct HttpServerObject
+        {
+            QString address = "0.0.0.0";
+            int port = 0;
+            QList<HTTPSOCKSUserObject> users;
+            JSONSTRUCT_COMPARE(HttpServerObject, address, port, users)
+            JSONSTRUCT_REGISTER(HttpServerObject, F(address, port, users))
+        };
+        //
+        // ShadowSocks Server
+        struct ShadowSocksServerObject
+        {
+            QString address = "0.0.0.0";
+            QString method = "aes-256-gcm";
+            QString password;
+            int port = 0;
+            JSONSTRUCT_COMPARE(ShadowSocksServerObject, address, method, password)
+            JSONSTRUCT_REGISTER(ShadowSocksServerObject, A(method), F(address, port, password))
+        };
         //
         // VMess Server
         constexpr auto VMESS_USER_ALTERID_DEFAULT = 0;
@@ -382,22 +419,31 @@ namespace Qv2ray::base::objects
             };
 
             QString address;
-            int port;
+            int port = 0;
             QList<UserObject> users;
             JSONSTRUCT_COMPARE(VMessServerObject, address, port, users)
             JSONSTRUCT_REGISTER(VMessServerObject, F(address, port, users))
         };
         //
-        // ShadowSocks Server
-        struct ShadowSocksServerObject
+        // VLESS Server
+        struct VLESSServerObject
         {
+            struct UserObject
+            {
+                QString id;
+                QString encryption = "none";
+                QString flow;
+                JSONSTRUCT_COMPARE(UserObject, id, encryption, flow)
+                JSONSTRUCT_REGISTER(UserObject, A(encryption), F(id, flow))
+            };
+
             QString address;
-            QString method;
-            QString password;
-            int port;
-            JSONSTRUCT_COMPARE(ShadowSocksServerObject, address, method, password)
-            JSONSTRUCT_REGISTER(ShadowSocksServerObject, F(address, port, method, password))
+            int port = 0;
+            QList<UserObject> users;
+            JSONSTRUCT_COMPARE(VLESSServerObject, address, port, users)
+            JSONSTRUCT_REGISTER(VLESSServerObject, F(address, port, users))
         };
+
         //
         // Trojan Server
         struct TrojanServerObject
