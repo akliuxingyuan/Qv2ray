@@ -111,6 +111,12 @@ namespace Qv2ray::core::connection
                 else
                     sharelink = vmess_new::Serialize(transport, vmessServer, alias);
             }
+            else if (type == "vless")
+            {
+                const auto vlessServer = VLESSServerObject::fromJson(settings["vnext"].toArray().first().toObject());
+                const auto streamSettingsObj = StreamSettingsObject::fromJson(streamSettings);
+                sharelink = vless::Serialize(streamSettingsObj, vlessServer, alias);
+            }
             else if (type == "shadowsocks")
             {
                 auto ssServer = ShadowSocksServerObject::fromJson(settings["servers"].toArray().first().toObject());

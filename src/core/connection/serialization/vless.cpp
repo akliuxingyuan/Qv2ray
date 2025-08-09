@@ -59,13 +59,9 @@ namespace Qv2ray::core::connection
             }
 
             // initialize QJsonObject with basic info
-            QJsonObject outbound;
-            QJsonObject stream;
+            VLESSServerObject server;
+            StreamSettingsObject stream;
 
-            QJsonIO::SetValue(outbound, "vless", "protocol");
-            QJsonIO::SetValue(outbound, host, "settings", "vnext", 0, "address");
-            QJsonIO::SetValue(outbound, port, "settings", "vnext", 0, "port" );
-            QJsonIO::SetValue(outbound, uuid, "settings", "vnext", 0, "users", 0, "id");
             // parse query
             QUrlQuery query(url.query());
 
@@ -73,51 +69,53 @@ namespace Qv2ray::core::connection
             const auto hasType = query.hasQueryItem("type");
             const auto type = hasType ? query.queryItemValue("type") : "tcp";
             if (type != "tcp")
-                QJsonIO::SetValue(stream, type, "network");
+                stream.network = type;
 
             // handle encryption
             const auto hasEncryption = query.hasQueryItem("encryption");
             const auto encryption = hasEncryption ? query.queryItemValue("encryption") : "none";
-            QJsonIO::SetValue(outbound, encryption, { "settings", "vnext", 0, "users", 0, "encryption" });
+            server.users.first().encryption = encryption;
 
             // type-wise settings
             if (type == "kcp")
             {
                 const auto hasSeed = query.hasQueryItem("seed");
                 if (hasSeed)
-                    QJsonIO::SetValue(stream, query.queryItemValue("seed"), { "kcpSettings", "seed" });
+                    stream.kcpSettings.seed = query.queryItemValue("seed");
 
                 const auto hasHeaderType = query.hasQueryItem("headerType");
                 const auto headerType = hasHeaderType ? query.queryItemValue("headerType") : "none";
                 if (headerType != "none")
-                    QJsonIO::SetValue(stream, headerType, { "kcpSettings", "header", "type" });
+                    stream.kcpSettings.header.type = headerType;
             }
             else if (type == "http")
             {
                 const auto hasPath = query.hasQueryItem("path");
                 const auto path = hasPath ? QUrl::fromPercentEncoding(query.queryItemValue("path").toUtf8()) : "/";
                 if (path != "/")
-                    QJsonIO::SetValue(stream, path, { "httpSettings", "path" });
+                    stream.httpSettings.path = path;
 
                 const auto hasHost = query.hasQueryItem("host");
                 if (hasHost)
                 {
-                    const auto hosts = QJsonArray::fromStringList(query.queryItemValue("host").split(","));
-                    QJsonIO::SetValue(stream, hosts, { "httpSettings", "host" });
+                    const auto hosts = query.queryItemValue("host").split(",");
+                    stream.httpSettings.host = hosts;
                 }
+            }
+            else if (type == "xhttp")
+            {
+                // TODO: xhttp sharelink standard
             }
             else if (type == "ws")
             {
                 const auto hasPath = query.hasQueryItem("path");
                 const auto path = hasPath ? QUrl::fromPercentEncoding(query.queryItemValue("path").toUtf8()) : "/";
                 if (path != "/")
-                    QJsonIO::SetValue(stream, path, { "wsSettings", "path" });
+                    stream.wsSettings.path = path;
 
                 const auto hasHost = query.hasQueryItem("host");
                 if (hasHost)
-                {
-                    QJsonIO::SetValue(stream, query.queryItemValue("host"), { "wsSettings", "headers", "Host" });
-                }
+                    stream.wsSettings.headers["host"] = query.queryItemValue("host");
             }
             else if (type == "quic")
             {
@@ -125,18 +123,15 @@ namespace Qv2ray::core::connection
                 if (hasQuicSecurity)
                 {
                     const auto quicSecurity = query.queryItemValue("quicSecurity");
-                    QJsonIO::SetValue(stream, quicSecurity, { "quicSettings", "security" });
+                    stream.quicSettings.security = quicSecurity;
 
                     if (quicSecurity != "none")
-                    {
-                        const auto key = query.queryItemValue("key");
-                        QJsonIO::SetValue(stream, key, { "quicSettings", "key" });
-                    }
+                        stream.quicSettings.key = query.queryItemValue("key");
 
                     const auto hasHeaderType = query.hasQueryItem("headerType");
                     const auto headerType = hasHeaderType ? query.queryItemValue("headerType") : "none";
                     if (headerType != "none")
-                        QJsonIO::SetValue(stream, headerType, { "quicSettings", "header", "type" });
+                        stream.quicSettings.header.type = headerType;
                 }
             }
             else if (type == "grpc")
@@ -145,14 +140,14 @@ namespace Qv2ray::core::connection
                 if (hasServiceName)
                 {
                     const auto serviceName = QUrl::fromPercentEncoding(query.queryItemValue("serviceName").toUtf8());
-                    QJsonIO::SetValue(stream, serviceName, { "grpcSettings", "serviceName" });
+                    stream.grpcSettings.serviceName = serviceName;
                 }
 
                 const auto hasMode = query.hasQueryItem("mode");
                 if (hasMode)
                 {
                     const auto multiMode = QUrl::fromPercentEncoding(query.queryItemValue("mode").toUtf8()) == "multi";
-                    QJsonIO::SetValue(stream, multiMode, { "grpcSettings", "multiMode" });
+                    stream.grpcSettings.multiMode = multiMode;
                 }
             }
 
@@ -161,63 +156,170 @@ namespace Qv2ray::core::connection
             const auto security = hasSecurity ? query.queryItemValue("security") : "none";
             const auto tlsKey = security == "tls" ? "tlsSettings" : "realitySettings";
             if (security != "none")
-            {
-                QJsonIO::SetValue(stream, security, "security");
-            }
-            // sni
-            const auto hasSNI = query.hasQueryItem("sni");
-            if (hasSNI)
-            {
-                const auto sni = query.queryItemValue("sni");
-                QJsonIO::SetValue(stream, sni, { tlsKey, "serverName" });
-            }
-            // alpn
-            const auto hasALPN = query.hasQueryItem("alpn");
-            if (hasALPN)
-            {
-                const auto alpnRaw = QUrl::fromPercentEncoding(query.queryItemValue("alpn").toUtf8());
-                const auto alpnArray = QJsonArray::fromStringList(alpnRaw.split(","));
-                QJsonIO::SetValue(stream, alpnArray, { tlsKey, "alpn" });
-            }
+                stream.security = security;
+
             if (security == "reality")
             {
                 // flow
                 const auto flow = query.queryItemValue("flow");
-                QJsonIO::SetValue(outbound, flow, { "settings", "vnext", 0, "users", 0, "flow" });
+                server.users.first().flow = flow;
+
+                // sni
+                const auto hasSNI = query.hasQueryItem("sni");
+                if (hasSNI)
+                {
+                    const auto sni = query.queryItemValue("sni");
+                    stream.realitySettings.serverName = sni;
+                }
 
                 // reality settings
                 if (query.hasQueryItem("fp"))
                 {
                     const auto fp = QUrl::fromPercentEncoding(query.queryItemValue("fp").toUtf8());
-                    QJsonIO::SetValue(stream, fp, { "realitySettings", "fingerprint" });
+                    stream.realitySettings.fingerprint = fp;
                 }
                 if (query.hasQueryItem("pbk"))
                 {
                     const auto pbk = QUrl::fromPercentEncoding(query.queryItemValue("pbk").toUtf8());
-                    QJsonIO::SetValue(stream, pbk, { "realitySettings", "publicKey" });
+                    stream.realitySettings.publicKey = pbk;
                 }
                 if (query.hasQueryItem("spiderX"))
                 {
                     const auto spiderX = QUrl::fromPercentEncoding(query.queryItemValue("spiderX").toUtf8());
-                    QJsonIO::SetValue(stream, spiderX, { "realitySettings", "spiderX" });
+                    stream.realitySettings.spiderX = spiderX;
                 }
                 if (query.hasQueryItem("sid"))
                 {
                     const auto sid = QUrl::fromPercentEncoding(query.queryItemValue("sid").toUtf8());
-                    QJsonIO::SetValue(stream, sid, { "realitySettings", "shortId" });
+                    stream.realitySettings.shortId = sid;
                 }
             } else if (security == "tls") {
-                // TODO: tls options
+                // sni
+                const auto hasSNI = query.hasQueryItem("sni");
+                if (hasSNI)
+                {
+                    const auto sni = query.queryItemValue("sni");
+                    stream.tlsSettings.serverName = sni;
+                }
+
+                // alpn
+                const auto hasALPN = query.hasQueryItem("alpn");
+                if (hasALPN)
+                {
+                    const auto alpnRaw = QUrl::fromPercentEncoding(query.queryItemValue("alpn").toUtf8());
+                    const auto alpnArray = alpnRaw.split(",");
+                    stream.tlsSettings.alpn = alpnArray;
+                }
             }
 
             // assembling config
             CONFIGROOT root;
-            outbound["streamSettings"] = stream;
-            outbound["tag"] = OUTBOUND_TAG_PROXY;
-            root["outbounds"] = QJsonArray{ outbound };
+            OUTBOUNDSETTING vConf;
+            OUTBOUNDS outbounds;
+            vConf["vnext"] = QJsonArray{ server.toJson() };
+            outbounds.append(GenerateOutboundEntry(OUTBOUND_TAG_PROXY, "vless", vConf , stream.toJson()));
+            JADD(outbounds);
 
-            // return
             return root;
+        }
+
+        const QString Serialize(const StreamSettingsObject &stream, const VLESSServerObject &server, const QString &alias)
+        {
+            QUrl url;
+            url.setFragment(QUrl::toPercentEncoding(alias));
+            url.setScheme("vless");
+            url.setHost(server.address);
+            url.setPort(server.port);
+            url.setUserName(server.users.first().id);
+
+            QUrlQuery query;
+            const auto encryption = server.users.first().encryption;
+            if (encryption != "none")
+                query.addQueryItem("encryption", encryption);
+
+            const auto network = stream.network;
+            if (network != "tcp")
+                query.addQueryItem("type", network);
+
+            const auto security = stream.security;
+            if (security != "none")
+                query.addQueryItem("security", security);
+
+            if (network == "kcp")
+            {
+                const auto seed = stream.kcpSettings.seed;
+                if (!seed.isEmpty())
+                    query.addQueryItem("seed", QUrl::toPercentEncoding(seed));
+
+                const auto headerType = stream.kcpSettings.header.type;
+                if (headerType != "none")
+                    query.addQueryItem("headerType", headerType);
+            }
+            else if (network == "http")
+            {
+                const auto path = stream.httpSettings.path;
+                query.addQueryItem("path", QUrl::toPercentEncoding(path));
+
+                const auto hosts = stream.httpSettings.host;
+                query.addQueryItem("host", QUrl::toPercentEncoding(hosts.join(",")));
+            }
+            else if (network == "ws")
+            {
+                const auto path = stream.wsSettings.path;
+                query.addQueryItem("path", QUrl::toPercentEncoding(path));
+
+                const auto host = stream.wsSettings.headers["host"];
+                query.addQueryItem("host", host);
+            }
+            else if (network == "quic")
+            {
+                const auto quicSecurity = stream.quicSettings.security;
+                if (quicSecurity != "none")
+                {
+                    query.addQueryItem("quicSecurity", quicSecurity);
+
+                    const auto key = stream.quicSettings.key;
+                    query.addQueryItem("key", QUrl::toPercentEncoding(key));
+
+                    const auto headerType = stream.quicSettings.header.type;
+                    if (headerType != "none")
+                        query.addQueryItem("headerType", headerType);
+                }
+            }
+            else if (network == "grpc")
+            {
+                auto serviceName = QString("GunService");
+                if (!stream.grpcSettings.serviceName.isEmpty())
+                    serviceName = stream.grpcSettings.serviceName;
+                if (serviceName != "GunService")
+                    query.addQueryItem("serviceName", QUrl::toPercentEncoding(serviceName));
+
+                const auto multiMode = stream.grpcSettings.multiMode;
+                if (multiMode)
+                    query.addQueryItem("mode", "multi");
+            }
+
+            if (security == "reality")
+            {
+                const auto flow = server.users.first().flow;
+                query.addQueryItem("flow", flow);
+
+                const auto sni = stream.realitySettings.serverName;
+                if (!sni.isEmpty())
+                    query.addQueryItem("sni", sni);
+            }
+            else if (security == "tls")
+            {
+                const auto sni = stream.realitySettings.serverName;
+                if (!sni.isEmpty())
+                    query.addQueryItem("sni", sni);
+
+                const auto alpnList = stream.tlsSettings.alpn;
+                query.addQueryItem("alpn", QUrl::toPercentEncoding(alpnList.join(",")));
+            }
+
+            url.setQuery(query);
+            return url.toString(QUrl::FullyEncoded);
         }
     } // namespace serialization::vless
 } // namespace Qv2ray::core::connection
