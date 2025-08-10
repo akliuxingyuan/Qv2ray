@@ -351,7 +351,7 @@ endif()
 # ==================================================================================
 if(_QV2RAY_HAS_GUI_INTERNAL_)
     add_definitions(-DQV2RAY_GUI)
-    include(cmake/qrencode.cmake)
+    include(cmake/qtqrcodebuilder.cmake)
 
     include(cmake/components/qv2ray-ui.cmake)
     list(APPEND QV2RAY_UI_SOURCES ${QV2RAY_UI_COMMON_SOURCES})
@@ -432,7 +432,7 @@ target_link_libraries(qv2ray PUBLIC
     qv2ray_baselib
     ${QNODEEDITOR_LIBRARY}
     ${QV2RAY_PLATFORM_LIBS}
-    ${QV2RAY_QRENCODE_LIBRARY}
+    ${QV2RAY_QTQRCODEBUILDER_LIBRARY}
     )
 
 

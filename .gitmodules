@@ -22,9 +22,6 @@
 [submodule "cmake/android"]
 	path = cmake/android
 	url = https://github.com/LaurentGomila/qt-android-cmake
-[submodule "3rdparty/QCodeEditor"]
-	path = 3rdparty/QCodeEditor
-	url = https://github.com/cpeditor/QCodeEditor
-[submodule "3rdparty/qt-qrcode"]
-	path = 3rdparty/qt-qrcode
-	url = https://github.com/danielsanfr/qt-qrcode
+[submodule "3rdparty/QtQrCodeBuilder"]
+	path = 3rdparty/QtQrCodeBuilder
+	url = https://github.com/akliuxingyuan/QtQrCodeBuilder.git
