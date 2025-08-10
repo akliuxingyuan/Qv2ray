@@ -59,6 +59,12 @@ jobs:
           echo "pkgver=$(grep --only-matching -P '(?<=pkgver=).*' ../PKGBUILD)" >> $GITHUB_ENV
           echo "pkgrel=$(grep --only-matching -P '(?<=pkgrel=).*' ../PKGBUILD)" >> $GITHUB_ENV
 
+      - uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: Prerelease
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_release: true
+
       - name: Upload packages
         uses: softprops/action-gh-release@v2
         with:
