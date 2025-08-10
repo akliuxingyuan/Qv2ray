@@ -3,6 +3,8 @@
 #include "Generation.hpp"
 #include "core/handler/ConfigHandler.hpp"
 
+#define QV_MODULE_NAME "Serialization"
+
 namespace Qv2ray::core::connection
 {
     namespace serialization

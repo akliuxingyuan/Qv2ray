@@ -60,7 +60,13 @@ namespace Qv2ray::core::connection
 
             // initialize QJsonObject with basic info
             VLESSServerObject server;
+            server.users << VLESSServerObject::UserObject{};
             StreamSettingsObject stream;
+
+            server.address = host;
+            server.port = port;
+
+            server.users.first().id = uuid;
 
             // parse query
             QUrlQuery query(url.query());
@@ -115,7 +121,7 @@ namespace Qv2ray::core::connection
 
                 const auto hasHost = query.hasQueryItem("host");
                 if (hasHost)
-                    stream.wsSettings.headers["host"] = query.queryItemValue("host");
+                    stream.wsSettings.headers["Host"] = query.queryItemValue("host");
             }
             else if (type == "quic")
             {
@@ -178,10 +184,16 @@ namespace Qv2ray::core::connection
                     const auto fp = QUrl::fromPercentEncoding(query.queryItemValue("fp").toUtf8());
                     stream.realitySettings.fingerprint = fp;
                 }
+                if (query.hasQueryItem("password"))
+                {
+                    const auto password = QUrl::fromPercentEncoding(query.queryItemValue("password").toUtf8());
+                    stream.realitySettings.password = password;
+                }
                 if (query.hasQueryItem("pbk"))
                 {
                     const auto pbk = QUrl::fromPercentEncoding(query.queryItemValue("pbk").toUtf8());
                     stream.realitySettings.publicKey = pbk;
+                    stream.realitySettings.password = pbk;
                 }
                 if (query.hasQueryItem("spiderX"))
                 {
@@ -268,7 +280,7 @@ namespace Qv2ray::core::connection
                 const auto path = stream.wsSettings.path;
                 query.addQueryItem("path", QUrl::toPercentEncoding(path));
 
-                const auto host = stream.wsSettings.headers["host"];
+                const auto host = stream.wsSettings.headers["Host"];
                 query.addQueryItem("host", host);
             }
             else if (network == "quic")
@@ -307,6 +319,30 @@ namespace Qv2ray::core::connection
                 const auto sni = stream.realitySettings.serverName;
                 if (!sni.isEmpty())
                     query.addQueryItem("sni", sni);
+
+                query.addQueryItem("fp", stream.realitySettings.fingerprint);
+
+                const auto password = stream.realitySettings.password;
+                if (!password.isEmpty())
+                {
+                    query.addQueryItem("password", stream.realitySettings.password);
+                    query.addQueryItem("pbk", stream.realitySettings.password);
+                }
+
+                const auto pbk = stream.realitySettings.publicKey;
+                if (!pbk.isEmpty())
+                {
+                    query.addQueryItem("pbk", stream.realitySettings.publicKey);
+                    query.addQueryItem("password", stream.realitySettings.publicKey);
+                }
+
+                const auto spiderX = stream.realitySettings.spiderX;
+                if (!spiderX.isEmpty())
+                    query.addQueryItem("spiderX", stream.realitySettings.spiderX);
+
+                const auto sid = stream.realitySettings.shortId;
+                if (!sid.isEmpty())
+                    query.addQueryItem("sid", stream.realitySettings.shortId);
             }
             else if (security == "tls")
             {

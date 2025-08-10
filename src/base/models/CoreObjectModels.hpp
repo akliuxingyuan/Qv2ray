@@ -326,6 +326,7 @@ namespace Qv2ray::base::objects
             bool show = false;
             QString fingerprint;
             QString publicKey;
+            QString password;
             QString shortId;
             QString spiderX;
             JSONSTRUCT_COMPARE(REALITYObject, serverName, show, fingerprint, publicKey, shortId, spiderX)
