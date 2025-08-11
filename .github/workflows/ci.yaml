@@ -41,11 +41,9 @@ jobs:
           submodules: 'true'
           fetch-depth: 0
 
-      - name: Tag Repo
+      - name: Git config
         run: |
           git config --global --add safe.directory '*'
-          git tag -d Prerelease
-          git tag Prerelease
 
       - name: Linux - build
         if: matrix.platform == 'ubuntu-latest'
