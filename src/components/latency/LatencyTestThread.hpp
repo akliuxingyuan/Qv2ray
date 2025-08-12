@@ -8,9 +8,10 @@
 
 namespace uvw
 {
-    class Loop;
-    class TimerHandle;
+    class loop;
+    class timer_handle;
 } // namespace uvw
+
 namespace Qv2ray::components::latency
 {
     class LatencyTestThread : public QThread
@@ -40,10 +41,10 @@ namespace Qv2ray::components::latency
                 curl_global_cleanup();
             }
         };
-        std::shared_ptr<uvw::Loop> loop;
+        std::shared_ptr<uvw::loop> loop;
         CURLGlobal curlGlobal;
         bool isStop = false;
-        std::shared_ptr<uvw::TimerHandle> stopTimer;
+        std::shared_ptr<uvw::timer_handle> stopTimer;
         std::vector<LatencyTestRequest> requests;
         std::mutex m;
 

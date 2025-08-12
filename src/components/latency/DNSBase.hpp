@@ -11,7 +11,7 @@ namespace Qv2ray::components::latency
         , public std::enable_shared_from_this<T>
     {
       public:
-        DNSBase(const std::shared_ptr<uvw::Loop> &loopin, LatencyTestRequest &req, LatencyTestHost *testHost)
+        DNSBase(const std::shared_ptr<uvw::loop> &loopin, LatencyTestRequest &req, LatencyTestHost *testHost)
             : req(std::move(req)), testHost(testHost), loop(loopin)
         {
         }
@@ -39,28 +39,31 @@ namespace Qv2ray::components::latency
             {
                 if (getAddrHandle)
                 {
-                    getAddrHandle->once<uvw::ErrorEvent>(coro(async_DNS_lookup));
-                    getAddrHandle->once<uvw::AddrInfoEvent>(coro(async_DNS_lookup));
-                    co_yield return getAddrHandle->addrInfo(req.host.toStdString(), digitBuffer);
-                    co_yield if constexpr (std::is_same_v<uvw::AddrInfoEvent, std::remove_reference_t<E>>)
+                    getAddrHandle->on<uvw::error_event>(coro(async_DNS_lookup));
+                    getAddrHandle->on<uvw::addr_info_event>(coro(async_DNS_lookup));
+                    co_yield {
+                        getAddrHandle->addr_info(req.host.toStdString(), digitBuffer);
+                        return;
+                    }
+                    co_yield if constexpr (std::is_same_v<uvw::addr_info_event, std::remove_reference_t<E>>)
                     {
                         if (getAddrInfoRes(e) != 0)
                         {
                             data.errorMessage = QObject::tr("DNS not resolved");
                             data.avg = LATENCY_TEST_VALUE_ERROR;
                             testHost->OnLatencyTestCompleted(req.id, data);
-                            h.clear();
+                            h.reset();
                             return;
                         }
                     }
                     else
                     {
-                        if constexpr (std::is_same_v<uvw::ErrorEvent, std::remove_reference_t<E>>)
+                        if constexpr (std::is_same_v<uvw::error_event, std::remove_reference_t<E>>)
                         {
                             data.errorMessage = QObject::tr("DNS not resolved");
                             data.avg = LATENCY_TEST_VALUE_ERROR;
                             testHost->OnLatencyTestCompleted(req.id, data);
-                            h.clear();
+                            h.reset();
                             return;
                         }
                     }
@@ -68,9 +71,9 @@ namespace Qv2ray::components::latency
             }
             ping();
             if (getAddrHandle)
-                getAddrHandle->clear();
+                getAddrHandle->reset();
         }
-        int getAddrInfoRes(uvw::AddrInfoEvent &e)
+        int getAddrInfoRes(uvw::addr_info_event &e)
         {
             struct addrinfo *rp = nullptr;
             for (rp = e.data.get(); rp != nullptr; rp = rp->ai_next)
@@ -120,9 +123,10 @@ namespace Qv2ray::components::latency
         LatencyTestHost *testHost;
         struct sockaddr_storage storage;
         char digitBuffer[20] = { 0 };
-        std::shared_ptr<uvw::Loop> loop;
-        std::shared_ptr<uvw::GetAddrInfoReq> getAddrHandle;
+        std::shared_ptr<uvw::loop> loop;
+        std::shared_ptr<uvw::get_addr_info_req> getAddrHandle;
     };
+
     template<typename T>
     DNSBase<T>::~DNSBase()
     {

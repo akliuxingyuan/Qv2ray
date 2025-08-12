@@ -1,13 +1,17 @@
 #pragma once
 #include "base/Qv2rayBase.hpp"
+
 namespace uvw
 {
-    class Loop;
+    class loop;
 }
+
 struct sockaddr_storage;
+
 namespace Qv2ray::components::latency
 {
     class LatencyTestThread;
+
     struct LatencyTestResult
     {
         QString errorMessage;
@@ -18,6 +22,7 @@ namespace Qv2ray::components::latency
         long avg = LATENCY_TEST_VALUE_ERROR;
         Qv2rayLatencyTestingMethod method;
     };
+
     struct LatencyTestRequest
     {
         ConnectionId id;

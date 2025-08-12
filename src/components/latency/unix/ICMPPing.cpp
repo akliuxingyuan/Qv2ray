@@ -43,6 +43,7 @@ namespace Qv2ray::components::latency::icmping
 
         return (uint16_t) ~sum;
     }
+
     void ICMPPing::deinit()
     {
         if (socketId >= 0)
@@ -75,7 +76,7 @@ namespace Qv2ray::components::latency::icmping
         data.avg = 0;
         if (isAddr() == -1)
         {
-            getAddrHandle = loop->resource<uvw::GetAddrInfoReq>();
+            getAddrHandle = loop->resource<uvw::get_addr_info_req>();
             sprintf(digitBuffer, "%d", req.port);
         }
         async_DNS_lookup(0, 0);
@@ -93,14 +94,12 @@ namespace Qv2ray::components::latency::icmping
             if (timeoutTimer)
             {
                 timeoutTimer->stop();
-                timeoutTimer->clear();
                 timeoutTimer->close();
             }
             if (pollHandle)
             {
                 if (!pollHandle->closing())
                     pollHandle->stop();
-                pollHandle->clear();
                 pollHandle->close();
             }
             return true;
@@ -110,16 +109,16 @@ namespace Qv2ray::components::latency::icmping
 
     void ICMPPing::ping()
     {
-        timeoutTimer = loop->resource<uvw::TimerHandle>();
-        uvw::OSSocketHandle osSocketHandle{ socketId };
-        pollHandle = loop->resource<uvw::PollHandle>(osSocketHandle);
-        timeoutTimer->once<uvw::TimerEvent>([this, ptr = std::weak_ptr<ICMPPing>{ shared_from_this() }](auto &, uvw::TimerHandle &h) {
+        timeoutTimer = loop->resource<uvw::timer_handle>();
+        uvw::os_socket_handle os_socket_handle{ socketId };
+        pollHandle = loop->resource<uvw::poll_handle>(os_socket_handle);
+        timeoutTimer->on<uvw::timer_event>([this, ptr = std::weak_ptr<ICMPPing>{ shared_from_this() }](auto &, uvw::timer_handle &h) {
             if (ptr.expired())
                 return;
             else
             {
                 auto p = ptr.lock();
-                pollHandle->clear();
+                pollHandle->reset();
                 if (!pollHandle->closing())
                     pollHandle->stop();
                 pollHandle->close();
@@ -128,9 +127,9 @@ namespace Qv2ray::components::latency::icmping
                 notifyTestHost();
             }
         });
-        timeoutTimer->start(uvw::TimerHandle::Time{ 10000 }, uvw::TimerHandle::Time{ 0 });
-        auto pollEvent = uvw::Flags<uvw::PollHandle::Event>::from<uvw::PollHandle::Event::READABLE>();
-        pollHandle->on<uvw::PollEvent>([this, ptr = shared_from_this()](uvw::PollEvent &, uvw::PollHandle &h) {
+        timeoutTimer->start(uvw::timer_handle::time{ 10000 }, uvw::timer_handle::time{ 0 });
+        auto pollEvent = uvw::poll_handle::poll_event_flags::READABLE;
+        pollHandle->on<uvw::poll_event>([this, ptr = shared_from_this()](uvw::poll_event &, uvw::poll_handle &h) {
             timeval end;
             sockaddr_in addr;
             socklen_t slen = sizeof(sockaddr_in);
@@ -175,7 +174,7 @@ namespace Qv2ray::components::latency::icmping
                         data.failedCount++;
                         if (notifyTestHost())
                         {
-                            h.clear();
+                            h.reset();
                             h.close();
                             return;
                         }
@@ -185,7 +184,7 @@ namespace Qv2ray::components::latency::icmping
                         data.failedCount++;
                         if (notifyTestHost())
                         {
-                            h.clear();
+                            h.reset();
                             h.close();
                             return;
                         }
@@ -195,7 +194,7 @@ namespace Qv2ray::components::latency::icmping
                         data.failedCount++;
                         if (notifyTestHost())
                         {
-                            h.clear();
+                            h.reset();
                             h.close();
                             return;
                         }
@@ -223,6 +222,7 @@ namespace Qv2ray::components::latency::icmping
             } while (n < 0 && errno == EINTR);
         }
     }
+
     ICMPPing::~ICMPPing()
     {
         deinit();

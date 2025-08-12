@@ -8,9 +8,9 @@
 
 struct RealPingContext
 {
-    std::shared_ptr<uvw::PollHandle> handle;
+    std::shared_ptr<uvw::poll_handle> handle;
     curl_socket_t sockfd;
-    RealPingContext(curl_socket_t sockfd, uvw::Loop &loop) : handle{ loop.resource<uvw::PollHandle>(uvw::OSSocketHandle{ sockfd }) }, sockfd{ sockfd }
+    RealPingContext(curl_socket_t sockfd, uvw::loop &loop) : handle{ loop.resource<uvw::poll_handle>(uvw::os_socket_handle{ sockfd }) }, sockfd{ sockfd }
     {
     }
 };
@@ -18,7 +18,7 @@ struct RealPingGlobalInfo
 {
     std::shared_ptr<Qv2ray::components::latency::realping::RealPing> _preserve_life_time;
     CURLM *multiHandle;
-    std::shared_ptr<uvw::TimerHandle> timer;
+    std::shared_ptr<uvw::timer_handle> timer;
     int *successCountPtr;
     LatencyTestResult *latencyResultPtr;
 };
@@ -70,30 +70,31 @@ static int start_timeout(CURLM *, long timeout_ms, void *userp)
         if (timeout_ms == 0)
             timeout_ms = 1; /* 0 means directly call socket_action, but we'll do it
                          in a bit */
-        globalInfo->timer->start(uvw::TimerHandle::Time{ timeout_ms }, uvw::TimerHandle::Time{ 0 });
+        globalInfo->timer->start(uvw::timer_handle::time{ timeout_ms }, uvw::timer_handle::time{ 0 });
     }
     return 0;
 }
+
 static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp, void *socketp)
 {
     auto pRealPingGlobalInfo = static_cast<RealPingGlobalInfo *>(userp);
     RealPingContext *curl_context;
-    uvw::Flags<uvw::PollHandle::Event> events{};
+    uvw::poll_handle::poll_event_flags events{};
 
     switch (action)
     {
         case CURL_POLL_IN:
         case CURL_POLL_OUT:
-            curl_context = socketp ? (RealPingContext *) socketp : new RealPingContext{ s, pRealPingGlobalInfo->timer->loop() };
+            curl_context = socketp ? (RealPingContext *) socketp : new RealPingContext{ s, pRealPingGlobalInfo->timer->parent() };
 
             if (!socketp)
                 curl_multi_assign(pRealPingGlobalInfo->multiHandle, s, (void *) curl_context);
 
             if (action == CURL_POLL_IN)
-                events = events | uvw::Flags<uvw::PollHandle::Event>::from<uvw::PollHandle::Event::READABLE>();
+                events = events | uvw::poll_handle::poll_event_flags::READABLE;
             if (action == CURL_POLL_OUT)
-                events = events | uvw::Flags<uvw::PollHandle::Event>::from<uvw::PollHandle::Event::WRITABLE>();
-            curl_context->handle->on<uvw::ErrorEvent>([sockfd = curl_context->sockfd, pRealPingGlobalInfo](uvw::ErrorEvent &, uvw::PollHandle &) {
+                events = events | uvw::poll_handle::poll_event_flags::WRITABLE;
+            curl_context->handle->on<uvw::error_event>([sockfd = curl_context->sockfd, pRealPingGlobalInfo](uvw::error_event &, uvw::poll_handle &) {
                 pRealPingGlobalInfo->timer->stop();
                 int running_handles;
                 auto flags = CURL_CSELECT_ERR;
@@ -102,14 +103,14 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp, v
                                  pRealPingGlobalInfo);
                 pRealPingGlobalInfo->_preserve_life_time->notifyTestHost();
             });
-            curl_context->handle->on<uvw::PollEvent>([sockfd = curl_context->sockfd, pRealPingGlobalInfo](uvw::PollEvent &e, uvw::PollHandle &) {
+            curl_context->handle->on<uvw::poll_event>([sockfd = curl_context->sockfd, pRealPingGlobalInfo](uvw::poll_event &e, uvw::poll_handle &) {
                 pRealPingGlobalInfo->timer->stop();
                 int running_handles;
                 int flags = 0;
 
-                if (e.flags & uvw::Flags<uvw::PollHandle::Event>{ uvw::PollHandle::Event::READABLE })
+                if (static_cast<int>(e.flags) & static_cast<int>(uvw::details::uvw_poll_event::READABLE))
                     flags |= CURL_CSELECT_IN;
-                if (e.flags & uvw::Flags<uvw::PollHandle::Event>{ uvw::PollHandle::Event::WRITABLE })
+                if (static_cast<int>(e.flags) & static_cast<int>(uvw::details::uvw_poll_event::WRITABLE))
                     flags |= CURL_CSELECT_OUT;
 
                 curl_multi_socket_action(pRealPingGlobalInfo->multiHandle, sockfd, flags, &running_handles);
@@ -134,10 +135,12 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp, v
     }
     return 0;
 }
+
 static size_t noop_cb(void *, size_t size, size_t nmemb, void *)
 {
     return size * nmemb;
 }
+
 namespace
 {
     bool isIPv6Any(in6_addr &addr)
@@ -149,12 +152,14 @@ namespace
         return addr.s_addr == INADDR_ANY;
     }
 } // namespace
+
 namespace Qv2ray::components::latency::realping
 {
-    RealPing::RealPing(std::shared_ptr<uvw::Loop> loopin, LatencyTestRequest &req, LatencyTestHost *testHost)
-        : req(std::move(req)), testHost(testHost), loop(std::move(loopin)), timeout(loop->resource<uvw::TimerHandle>())
+    RealPing::RealPing(std::shared_ptr<uvw::loop> loopin, LatencyTestRequest &req, LatencyTestHost *testHost)
+        : req(std::move(req)), testHost(testHost), loop(std::move(loopin)), timeout(loop->resource<uvw::timer_handle>())
     {
     }
+
     std::string RealPing::getProxyAddress()
     {
         struct sockaddr_storage addr
@@ -201,6 +206,7 @@ namespace Qv2ray::components::latency::realping
         }
         return (protocolWithUsrPwd + proxy_ip + ":" + QSTRN(port)).toStdString();
     }
+
     void RealPing::start()
     {
         if (!GlobalConfig.inboundConfig.useSocks && !GlobalConfig.inboundConfig.useHTTP)
@@ -218,11 +224,11 @@ namespace Qv2ray::components::latency::realping
         auto curlMultiHandle = curl_multi_init();
         auto globalInfo = std::make_shared<RealPingGlobalInfo>(
             RealPingGlobalInfo{ shared_from_this(), curlMultiHandle, timeout->shared_from_this(), &successCount, &data });
-        timeout->once<uvw::CloseEvent>([globalInfo, curlMultiHandle](auto &, auto &h) {
+        timeout->on<uvw::close_event>([globalInfo, curlMultiHandle](auto &, auto &h) {
             curl_multi_cleanup(curlMultiHandle);
-            h.clear();
+            h.reset();
         });
-        timeout->on<uvw::TimerEvent>([globalInfo, curlMultiHandle, suc_cnt_ptr = &successCount, fail_cnt_ptr = &data, this](auto &, auto &) {
+        timeout->on<uvw::timer_event>([globalInfo, curlMultiHandle, suc_cnt_ptr = &successCount, fail_cnt_ptr = &data, this](auto &, auto &) {
             int running_handles;
             curl_multi_socket_action(curlMultiHandle, CURL_SOCKET_TIMEOUT, 0, &running_handles);
             check_multi_info(curlMultiHandle, suc_cnt_ptr, fail_cnt_ptr, globalInfo.get());
@@ -244,6 +250,7 @@ namespace Qv2ray::components::latency::realping
             curl_multi_add_handle(curlMultiHandle, handle);
         }
     }
+
     void RealPing::notifyTestHost()
     {
         if (data.failedCount + successCount == req.totalCount)
@@ -256,16 +263,19 @@ namespace Qv2ray::components::latency::realping
             timeout->close();
         }
     }
+
     RealPing::~RealPing()
     {
         LOG("Realping done!");
     }
+
     long RealPing::getHandleTime(CURL *h)
     {
         if (reqStartTime.find(h) == reqStartTime.end())
             return 0;
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - reqStartTime[h]).count();
     }
+
     void RealPing::recordHanleTime(CURL *h)
     {
         reqStartTime.emplace(h, std::chrono::system_clock::now());

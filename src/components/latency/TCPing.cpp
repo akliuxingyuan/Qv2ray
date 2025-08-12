@@ -1,6 +1,7 @@
 #include "TCPing.hpp"
 
 #include "uvw.hpp"
+#include <arpa/inet.h>
 
 #define QV_MODULE_NAME "TCPingWorker"
 
@@ -45,14 +46,16 @@ namespace Qv2ray::components::latency::tcping
         af = isAddr();
         if (af == -1)
         {
-            getAddrHandle = loop->resource<uvw::GetAddrInfoReq>();
+            getAddrHandle = loop->resource<uvw::get_addr_info_req>();
             sprintf(digitBuffer, "%d", req.port);
         }
         async_DNS_lookup(0, 0);
     }
+
     TCPing::~TCPing()
     {
     }
+
     void TCPing::notifyTestHost()
     {
         if (data.failedCount + successCount == req.totalCount)
@@ -64,21 +67,31 @@ namespace Qv2ray::components::latency::tcping
             testHost->OnLatencyTestCompleted(req.id, data);
         }
     }
+
     void TCPing::ping()
     {
         for (; data.totalCount < req.totalCount; ++data.totalCount)
         {
-            auto tcpClient = loop->resource<uvw::TCPHandle>();
+            char host[100] = {0};
+            char service[100] = {0};
+            getnameinfo(
+                (const struct sockaddr*)&storage, sizeof(struct sockaddr_storage),
+                host, sizeof(host),
+                service, sizeof(service),
+                NI_NUMERICHOST | NI_NUMERICSERV // numeric only
+            );
+            LOG("TCPPing::ping ", "host=", std::string(host), "port=", std::string(service));
+            auto tcpClient = loop->resource<uvw::tcp_handle>();
             tcpClient->open(getSocket(af, SOCK_STREAM, IPPROTO_TCP));
-            tcpClient->once<uvw::ErrorEvent>([ptr = shared_from_this(), this](const uvw::ErrorEvent &e, uvw::TCPHandle &h) {
+            tcpClient->on<uvw::error_event>([ptr = shared_from_this(), this](const uvw::error_event &e, uvw::tcp_handle &h) {
                 LOG("error connecting to host: " + req.host + ":" + QSTRN(req.port) + " " + e.what());
                 data.failedCount += 1;
                 data.errorMessage = e.what();
                 notifyTestHost();
-                h.clear();
+                h.reset();
                 h.close();
             });
-            tcpClient->once<uvw::ConnectEvent>([ptr = shared_from_this(), start = system_clock::now(), this](auto &, auto &h) {
+            tcpClient->on<uvw::connect_event>([ptr = shared_from_this(), start = system_clock::now(), this](auto &, auto &h) {
                 ++successCount;
                 system_clock::time_point end = system_clock::now();
                 auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -87,7 +100,7 @@ namespace Qv2ray::components::latency::tcping
                 data.worst = std::max(data.worst, ms);
                 data.best = std::min(data.best, ms);
                 notifyTestHost();
-                h.clear();
+                h.reset();
                 h.close();
             });
             tcpClient->connect(reinterpret_cast<const sockaddr &>(storage));

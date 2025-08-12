@@ -4,6 +4,7 @@
 #include "base/Qv2rayBase.hpp"
 
 #include <type_traits>
+
 namespace Qv2ray::components::latency::tcping
 {
     class TCPing : public DNSBase<TCPing>

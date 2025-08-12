@@ -29,9 +29,9 @@ namespace Qv2ray::components::latency
 
     void LatencyTestThread::run()
     {
-        loop = uvw::Loop::create();
-        stopTimer = loop->resource<uvw::TimerHandle>();
-        stopTimer->on<uvw::TimerEvent>([this](auto &, auto &handle) {
+        loop = uvw::loop::create();
+        stopTimer = loop->resource<uvw::timer_handle>();
+        stopTimer->on<uvw::timer_event>([this](auto &, auto &handle) {
             if (isStop)
             {
                 if (!requests.empty())
@@ -49,7 +49,7 @@ namespace Qv2ray::components::latency
                 {
                     handle.stop();
                     handle.close();
-                    loop->clear();
+                    loop->reset();
                     loop->close();
                     loop->stop();
                 }
@@ -88,9 +88,10 @@ namespace Qv2ray::components::latency
                 requests.clear();
             }
         });
-        stopTimer->start(uvw::TimerHandle::Time{ 500 }, uvw::TimerHandle::Time{ 500 });
+        stopTimer->start(uvw::timer_handle::time{ 500 }, uvw::timer_handle::time{ 500 });
         loop->run();
     }
+
     void LatencyTestThread::pushRequest(const QList<ConnectionId> &ids, int totalTestCount, Qv2rayLatencyTestingMethod method)
     {
         if (isStop)
