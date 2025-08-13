@@ -93,11 +93,13 @@ namespace Qv2ray::components::latency::icmping
             testHost->OnLatencyTestCompleted(req.id, data);
             if (timeoutTimer)
             {
+                timeoutTimer->reset();
                 timeoutTimer->stop();
                 timeoutTimer->close();
             }
             if (pollHandle)
             {
+                pollHandle.reset();
                 if (!pollHandle->closing())
                     pollHandle->stop();
                 pollHandle->close();

@@ -162,7 +162,7 @@ namespace Qv2ray::base::config
         };
 
         Qv2rayLatencyTestingMethod latencyTestingMethod = TCPING;
-        QString latencyRealPingTestURL = "https://www.google.com";
+        QString latencyRealPingTestURL = "https://www.gstatic.com/generate_204";
         Qv2rayProxyType proxyType = QVPROXY_NONE;
         QString address = "127.0.0.1";
         QString type = "http";

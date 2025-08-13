@@ -1,7 +1,6 @@
 #include "TCPing.hpp"
 
 #include "uvw.hpp"
-#include <arpa/inet.h>
 
 #define QV_MODULE_NAME "TCPingWorker"
 
@@ -80,7 +79,7 @@ namespace Qv2ray::components::latency::tcping
                 service, sizeof(service),
                 NI_NUMERICHOST | NI_NUMERICSERV // numeric only
             );
-            LOG("TCPPing::ping ", "host=", std::string(host), "port=", std::string(service));
+            LOG("TCPPing::ping ", std::format("Host={} Port={}", host, service));
             auto tcpClient = loop->resource<uvw::tcp_handle>();
             tcpClient->open(getSocket(af, SOCK_STREAM, IPPROTO_TCP));
             tcpClient->on<uvw::error_event>([ptr = shared_from_this(), this](const uvw::error_event &e, uvw::tcp_handle &h) {
