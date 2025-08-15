@@ -50,8 +50,8 @@ namespace Qv2ray::components::latency
                     handle.stop();
                     handle.close();
                     loop->reset();
-                    loop->close();
                     loop->stop();
+                    loop->close();
                 }
             }
             else
