@@ -4,22 +4,24 @@ pkgver_=2.8.0.8000
 pkgrel=1
 pkgdesc="Cross-platform V2Ray Client written in Qt (Development Release)"
 arch=('x86_64')
-url='https://github.com/Qv2ray/Qv2ray'
+url='https://github.com/akliuxingyuan/Qv2ray'
 license=('GPL3')
 depends=('hicolor-icon-theme' 'qt6-base' 'grpc' 'qt6-svg')
 optdepends=('xray: use system xray core.')
 makedepends=('git' 'make' 'qt6-tools' 'which' 'gcc' 'qt6-declarative' 'cmake' 'ninja')
 provides=('qv2ray')
 conflicts=('qv2ray')
+options=('debug')
 
 source=()
 sha512sums=()
-
 
 prepare() {
     # dirty trick
     cd "${srcdir}"
     ln -s ../Qv2ray Qv2ray
+    cd Qv2ray/3rdparty/SingleApplication
+    patch -Np1 < ${srcdir}/Qv2ray/singleapplication.patch
 }
 
 pkgver() {

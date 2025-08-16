@@ -1,0 +1,19 @@
+diff --git a/singleapplication.cpp b/singleapplication.cpp
+index 340519a..05ec798 100644
+--- a/singleapplication.cpp
++++ b/singleapplication.cpp
+@@ -150,8 +150,13 @@ SingleApplication::SingleApplication( int &argc, char *argv[], bool allowSeconda
+     // Check if another instance can be started
+     if( allowSecondary ){
+         d->startSecondary();
++        auto type = SingleApplicationPrivate::InvalidConnection;
+         if( d->options & Mode::SecondaryNotification ){
+-            d->connectToPrimary( timeout, SingleApplicationPrivate::SecondaryInstance );
++            type = SingleApplicationPrivate::SecondaryInstance;
++        }
++        if (!d->connectToPrimary(timeout, type)) {
++            d->initializeMemoryBlock();
++            d->startPrimary();
+         }
+         if( ! d->memory->unlock() ){
+           qDebug() << "SingleApplication: Unable to unlock memory after secondary start.";

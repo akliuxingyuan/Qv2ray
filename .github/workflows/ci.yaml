@@ -67,5 +67,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: Prerelease
-          files: qv2ray-dev-git-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
+          files: |
+            qv2ray-dev-git-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
+            qv2ray-dev-git-debug-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
           prerelease: true
