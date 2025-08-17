@@ -326,13 +326,11 @@ namespace Qv2ray::core::connection
                 if (!password.isEmpty())
                 {
                     query.addQueryItem("password", stream.realitySettings.password);
-                    query.addQueryItem("pbk", stream.realitySettings.password);
                 }
 
                 const auto pbk = stream.realitySettings.publicKey;
-                if (!pbk.isEmpty())
+                if (!pbk.isEmpty() && password.isEmpty())
                 {
-                    query.addQueryItem("pbk", stream.realitySettings.publicKey);
                     query.addQueryItem("password", stream.realitySettings.publicKey);
                 }
 

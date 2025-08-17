@@ -1,5 +1,4 @@
 #include "QRCodeHelper.hpp"
-
 #include "QtQrCodeBuilder.hpp"
 
 #include <QImage>
