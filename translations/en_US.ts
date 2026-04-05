@@ -2382,6 +2382,10 @@ This option may be useful for some desktop environments without tray support.</s
         <source>missing uuid</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Not a Trojan share link!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Qv2ray::Qv2rayWidgetApplication</name>
@@ -3271,6 +3275,30 @@ Maybe you have downloaded the wrong core?</source>
         <source>TCP Keepalive Interval</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>REALITY Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print debug log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fingerprint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Svr public key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Short id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SpiderX</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>w_GroupManager</name>
@@ -3861,6 +3889,17 @@ Maybe you have downloaded the wrong core?</source>
     </message>
     <message>
         <source>One SHA-256 per line. eg: 50c393f158c3de2db92fa9661bfb00eda5b67c3a777c88524ed3417509631625 6e6ed938298daf79a0173ebca30521a72ab07a9f535bfd6b178e0fc39dff2f4d b635d5701f7b12310fa94fae8040d3fc816a4dc2f0682a14ed4103aae39c0bd6 </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>trojanOutEditor</name>
+    <message>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

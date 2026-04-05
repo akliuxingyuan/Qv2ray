@@ -82,6 +82,7 @@ set(QV2RAY_BASE_SOURCES
     ${QV2RAY_BASEDIR_CORE}/connection/serialization/vmess_new.cpp
     ${QV2RAY_BASEDIR_CORE}/connection/serialization/vless.cpp
     ${QV2RAY_BASEDIR_CORE}/connection/serialization/trojan.cpp
+    ${QV2RAY_BASEDIR_CORE}/connection/serialization/hysteria.cpp
     #
     ${QV2RAY_BASEDIR_CORE}/CoreUtils.cpp
     ${QV2RAY_BASEDIR_CORE}/CoreUtils.hpp

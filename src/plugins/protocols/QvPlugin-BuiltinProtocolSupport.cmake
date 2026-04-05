@@ -20,14 +20,12 @@ ADD_SOURCE(outbound shadowsocks)
 ADD_SOURCE(outbound vless)
 ADD_SOURCE(outbound vmess)
 ADD_SOURCE(outbound trojan)
+ADD_SOURCE(outbound hysteria)
 ADD_SOURCE(outbound loopback)
 
 ADD_SOURCE(inbound dokodemo-door)
 ADD_SOURCE(inbound httpin)
 ADD_SOURCE(inbound socksin)
-#ADD_SOURCE(inbound shadowsocks)
-#ADD_SOURCE(inbound vless)
-#ADD_SOURCE(inbound vmess)
 
 set(BUILTIN_PROTOCOL_PLUGIN_SOURCES
     ${PLUGIN_UI_SOURCE}

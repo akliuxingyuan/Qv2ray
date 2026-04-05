@@ -41,6 +41,12 @@ namespace Qv2ray::core::connection::serialization
         const QString Serialize(const StreamSettingsObject &stream, const TrojanServerObject &server, const QString &alias);
     } // namespace trojan
 
+    namespace hysteria
+    {
+        CONFIGROOT Deserialize(const QString &hysteria, QString *alias, QString *errMessage);
+        const QString Serialize(const StreamSettingsObject &stream, const HysteriaServerObject &server, const QString &alias);
+    } // namespace hysteria
+
     namespace ss
     {
         CONFIGROOT Deserialize(const QString &ss, QString *alias, QString *errMessage);

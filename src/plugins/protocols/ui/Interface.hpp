@@ -15,6 +15,7 @@
 #include "outbound/vless.hpp"
 #include "outbound/vmess.hpp"
 #include "outbound/trojan.hpp"
+#include "outbound/hysteria.hpp"
 
 using namespace Qv2rayPlugin;
 
@@ -46,7 +47,8 @@ class ProtocolGUIInterface : public PluginGUIInterface
     {
         return {
             MakeEditorInfoPair<VmessOutboundEditor>("vmess", "VMess"),                   //
-            MakeEditorInfoPair<TrojanOutboundEditor>("trojan", "Trojan"),                 //
+            MakeEditorInfoPair<TrojanOutboundEditor>("trojan", "Trojan"),                //
+            MakeEditorInfoPair<HysteriaOutboundEditor>("hysteria", "Hysteria2"),         //
             MakeEditorInfoPair<VlessOutboundEditor>("vless", "VLESS"),                   //
             MakeEditorInfoPair<ShadowsocksOutboundEditor>("shadowsocks", "Shadowsocks"), //
             MakeEditorInfoPair<HttpOutboundEditor>("http", "HTTP"),                      //

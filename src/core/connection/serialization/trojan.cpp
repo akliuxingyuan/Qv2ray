@@ -18,7 +18,7 @@ namespace Qv2ray::core::connection
             if (trojanUri.length() < 9)
             {
                 LOG("trojan:// string too short");
-                *errMessage = QObject::tr("SS URI is too short");
+                *errMessage = QObject::tr("Trojan URI is too short");
             }
 
             auto url = QUrl::fromUserInput(trojanUri);

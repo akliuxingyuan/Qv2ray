@@ -44,6 +44,12 @@ namespace Qv2ray::core::connection
                 TLSOptionsFilter(conf);
                 connectionConf << std::pair{ *aliasPrefix, conf };
             }
+            else if (link.startsWith("hysteria2://"))
+            {
+                auto conf = hysteria::Deserialize(link, aliasPrefix, errMessage);
+                TLSOptionsFilter(conf);
+                connectionConf << std::pair{ *aliasPrefix, conf };
+            }
             else if (link.startsWith("ss://") && !link.contains("plugin="))
             {
                 auto conf = ss::Deserialize(link, aliasPrefix, errMessage);
@@ -129,6 +135,12 @@ namespace Qv2ray::core::connection
                 auto trojanServer = TrojanServerObject::fromJson(settings["servers"].toArray().first().toObject());
                 const auto streamSettingsObj = StreamSettingsObject::fromJson(streamSettings);
                 sharelink = trojan::Serialize(streamSettingsObj, trojanServer, alias);
+            }
+            else if (type == "hysteria")
+            {
+                auto hysteriaServer = HysteriaServerObject::fromJson(settings);
+                const auto streamSettingsObj = StreamSettingsObject::fromJson(streamSettings);
+                sharelink = hysteria::Serialize(streamSettingsObj, hysteriaServer, alias);
             }
             else
             {

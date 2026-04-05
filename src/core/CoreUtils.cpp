@@ -128,6 +128,7 @@ namespace Qv2ray::core
         if (!security.isEmpty() && security != "none")
             result << streamSettings["security"].toString();
 
+        result.removeDuplicates();
         return result.join("+");
     }
 

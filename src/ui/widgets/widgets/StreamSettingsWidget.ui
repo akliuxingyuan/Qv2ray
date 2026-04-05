@@ -639,23 +639,6 @@
          </widget>
          <widget class="QWidget" name="dsStackPage">
           <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_17">
-             <property name="text">
-              <string>Path</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="dsPathTxt">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="placeholderText">
-              <string notr="true">/dsPath</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="quicStackPage">
@@ -829,7 +812,7 @@
            </item>
            <item>
             <property name="text">
-             <string notr="true">domainsocket</string>
+             <string notr="true">hysteria</string>
             </property>
            </item>
            <item>
@@ -1120,7 +1103,6 @@
   <tabstop>wsHeadersTxt</tabstop>
   <tabstop>kcpUploadCapacSB</tabstop>
   <tabstop>kcpDownCapacitySB</tabstop>
-  <tabstop>dsPathTxt</tabstop>
   <tabstop>quicSecurityCB</tabstop>
   <tabstop>quicKeyTxt</tabstop>
   <tabstop>quicHeaderTypeCB</tabstop>

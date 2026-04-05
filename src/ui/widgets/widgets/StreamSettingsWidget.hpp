@@ -20,9 +20,6 @@ class StreamSettingsWidget
   private slots:
     void on_transportCombo_currentIndexChanged(int arg1);
 
-    // Domain Socket
-    void on_dsPathTxt_textEdited(const QString &arg1);
-
     // HTTP
     void on_httpHostTxt_textChanged();
     void on_httpPathTxt_textEdited(const QString &arg1);

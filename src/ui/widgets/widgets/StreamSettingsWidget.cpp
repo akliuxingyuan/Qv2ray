@@ -95,10 +95,6 @@ void StreamSettingsWidget::SetStreamObject(const StreamSettingsObject &sso)
         kcpWriteBufferSB->setValue(stream.kcpSettings.writeBufferSize);
         kcpSeedTxt->setText(stream.kcpSettings.seed);
     }
-    // DS
-    {
-        dsPathTxt->setText(stream.dsSettings.path);
-    }
     // QUIC
     {
         quicKeyTxt->setText(stream.quicSettings.key);
@@ -256,11 +252,6 @@ void StreamSettingsWidget::on_kcpHeaderType_currentIndexChanged(int arg1)
 void StreamSettingsWidget::on_kcpSeedTxt_textEdited(const QString &arg1)
 {
     stream.kcpSettings.seed = arg1;
-}
-
-void StreamSettingsWidget::on_dsPathTxt_textEdited(const QString &arg1)
-{
-    stream.dsSettings.path = arg1;
 }
 
 void StreamSettingsWidget::on_tcpRequestEditBtn_clicked()

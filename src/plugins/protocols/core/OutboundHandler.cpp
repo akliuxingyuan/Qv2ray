@@ -43,9 +43,15 @@ const Qv2rayPlugin::OutboundInfoObject BuiltinSerializer::GetOutboundInfo(const 
     }
     else if (protocol == "trojan")
     {
-        const auto ss = TrojanServerObject::fromJson(outbound["servers"].toArray().first());
-        obj[INFO_SERVER] = ss.address;
-        obj[INFO_PORT] = ss.port;
+        const auto trojan = TrojanServerObject::fromJson(outbound["servers"].toArray().first());
+        obj[INFO_SERVER] = trojan.address;
+        obj[INFO_PORT] = trojan.port;
+    }
+    else if (protocol == "hysteria")
+    {
+        const auto hysteria = HysteriaServerObject::fromJson(outbound);
+        obj[INFO_SERVER] = hysteria.address;
+        obj[INFO_PORT] = hysteria.port;
     }
     return obj;
 }
@@ -56,6 +62,11 @@ const void BuiltinSerializer::SetOutboundInfo(const QString &protocol, const Qv2
     {
         QJsonIO::SetValue(outbound, info[INFO_SERVER].toString(), "servers", 0, "address");
         QJsonIO::SetValue(outbound, info[INFO_PORT].toInt(), "servers", 0, "port");
+    }
+    else if ((QStringList{ "hysteria"}).contains(protocol))
+    {
+        QJsonIO::SetValue(outbound, info[INFO_SERVER].toString(), "address");
+        QJsonIO::SetValue(outbound, info[INFO_PORT].toString(), "port");
     }
     else if ((QStringList{ "vless", "vmess" }).contains(protocol))
     {

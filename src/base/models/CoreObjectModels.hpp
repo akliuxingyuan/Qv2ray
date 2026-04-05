@@ -253,14 +253,6 @@ namespace Qv2ray::base::objects
         };
         //
         //
-        struct DomainSocketObject
-        {
-            QString path = "/";
-            JSONSTRUCT_COMPARE(DomainSocketObject, path)
-            JSONSTRUCT_REGISTER(DomainSocketObject, F(path))
-        };
-        //
-        //
         struct QuicObject
         {
             QString security = "none";
@@ -278,7 +270,6 @@ namespace Qv2ray::base::objects
             JSONSTRUCT_COMPARE(gRPCObject, serviceName, multiMode)
             JSONSTRUCT_REGISTER(gRPCObject, F(serviceName, multiMode))
         };
-
         //
         //
         struct SockoptObject
@@ -332,6 +323,56 @@ namespace Qv2ray::base::objects
             JSONSTRUCT_COMPARE(REALITYObject, serverName, show, fingerprint, publicKey, shortId, spiderX)
             JSONSTRUCT_REGISTER(REALITYObject, F(serverName, show, fingerprint, publicKey, shortId, spiderX))
         };
+        //
+        //
+        struct HysteriaObject
+        {
+            int version = 2;
+            QString auth;
+            int udpIdleTimeout = 60;
+            JSONSTRUCT_COMPARE(HysteriaObject, version, auth, udpIdleTimeout);
+            JSONSTRUCT_REGISTER(HysteriaObject, A(version, udpIdleTimeout), F(auth));
+        };
+        //
+        //
+        struct MaskSettings
+        {
+            QString password;
+            JSONSTRUCT_COMPARE(MaskSettings, password)
+            JSONSTRUCT_REGISTER(MaskSettings, F(password))
+        };
+        struct MaskObject
+        {
+            QString type;
+            MaskSettings settings;
+            JSONSTRUCT_COMPARE(MaskObject, type, settings)
+            JSONSTRUCT_REGISTER(MaskObject, F(type, settings))
+        };
+        struct UdpHopObject
+        {
+            QString ports;
+            int interval = 30;
+            JSONSTRUCT_COMPARE(UdpHopObject, ports, interval)
+            JSONSTRUCT_REGISTER(UdpHopObject, A(interval), F(ports))
+        };
+        struct QuicParamsObject
+        {
+            QString congestion = "brutal";
+            bool debug = false;
+            UdpHopObject udpHop;
+            QString brutalUp;
+            QString brutalDown;
+            JSONSTRUCT_COMPARE(QuicParamsObject, congestion, udpHop, debug, brutalUp, brutalDown)
+            JSONSTRUCT_REGISTER(QuicParamsObject, A(debug), F(congestion, udpHop, brutalUp, brutalDown))
+        };
+        struct FinalMaskObject
+        {
+            QList<MaskObject> udp;
+            QList<MaskObject> tcp;
+            QuicParamsObject quicParams;
+            JSONSTRUCT_COMPARE(FinalMaskObject, udp, tcp, quicParams)
+            JSONSTRUCT_REGISTER(FinalMaskObject, F(udp, tcp, quicParams))
+        };
     } // namespace transfer
     //
     //
@@ -345,14 +386,15 @@ namespace Qv2ray::base::objects
         transfer::KCPObject kcpSettings;
         transfer::WebSocketObject wsSettings;
         transfer::HttpObject httpSettings;
-        transfer::DomainSocketObject dsSettings;
         transfer::QuicObject quicSettings;
         transfer::gRPCObject grpcSettings;
         transfer::REALITYObject realitySettings;
+        transfer::HysteriaObject hysteriaSettings;
+        transfer::FinalMaskObject finalmask;
         JSONSTRUCT_COMPARE(StreamSettingsObject, network, security, sockopt, //
-                           tcpSettings, tlsSettings, kcpSettings, wsSettings, httpSettings, dsSettings, quicSettings, grpcSettings, realitySettings)
+                           tcpSettings, tlsSettings, kcpSettings, wsSettings, httpSettings, quicSettings, grpcSettings, realitySettings, hysteriaSettings, finalmask)
         JSONSTRUCT_REGISTER(StreamSettingsObject, F(network, security, sockopt),
-                            F(tcpSettings, tlsSettings, kcpSettings, wsSettings, httpSettings, dsSettings, quicSettings, grpcSettings, realitySettings))
+                            F(tcpSettings, tlsSettings, kcpSettings, wsSettings, httpSettings, quicSettings, grpcSettings, realitySettings, hysteriaSettings, finalmask))
     };
 
     struct FakeDNSObject
@@ -444,7 +486,6 @@ namespace Qv2ray::base::objects
             JSONSTRUCT_COMPARE(VLESSServerObject, address, port, users)
             JSONSTRUCT_REGISTER(VLESSServerObject, F(address, port, users))
         };
-
         //
         // Trojan Server
         struct TrojanServerObject
@@ -455,6 +496,16 @@ namespace Qv2ray::base::objects
             int level = 0;
             JSONSTRUCT_COMPARE(TrojanServerObject, address, password, level)
             JSONSTRUCT_REGISTER(TrojanServerObject, A(port), F(address, password, level))
+        };
+        //
+        // Hysteria Server
+        struct HysteriaServerObject
+        {
+            QString address;
+            int port;
+            int version = 2;
+            JSONSTRUCT_COMPARE(HysteriaServerObject, address, port, version)
+            JSONSTRUCT_REGISTER(HysteriaServerObject, A(version), F(address, port))
         };
     } // namespace protocol
 } // namespace Qv2ray::base::objects

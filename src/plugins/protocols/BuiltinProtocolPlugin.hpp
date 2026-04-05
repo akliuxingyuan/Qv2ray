@@ -22,7 +22,7 @@ class InternalProtocolSupportPlugin
         return { "Builtin Protocol Support",                                                  //
                  "Qv2ray Core Workgroup",                                                     //
                  "qvplugin_builtin_protocol",                                                 //
-                 "VMess, VLESS, SOCKS, HTTP, Shadowsocks, DNS, Dokodemo-door editor support", //
+                 "VMess, VLESS, SOCKS, HTTP, Shadowsocks, Trojan, Hysteria2, DNS, Dokodemo-door editor support", //
                  QV2RAY_VERSION_STRING,                                                       //
                  "Qv2ray/Qv2ray",                                                             //
                  {

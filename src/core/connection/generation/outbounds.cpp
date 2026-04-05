@@ -59,6 +59,18 @@ namespace Qv2ray::core::connection::generation::outbounds
         return root;
     }
 
+    OUTBOUNDSETTING GenerateHysteriaOUT(const HysteriaServerObject &server)
+    {
+        return GenerateHysteriaServerOUT(server.address, server.port, server.version);
+    }
+
+    OUTBOUNDSETTING GenerateHysteriaServerOUT(const QString &address, int port, int version)
+    {
+        OUTBOUNDSETTING root;
+        JADD(address, port, version)
+        return root;
+    }
+
     OUTBOUNDSETTING GenerateHTTPSOCKSOut(const QString &addr, int port, bool useAuth, const QString &username, const QString &password)
     {
         OUTBOUNDSETTING root;

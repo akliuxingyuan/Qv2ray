@@ -149,6 +149,7 @@ Qv2rayExitReason Qv2rayPlatformApplication::RunQv2ray()
 
 void Qv2rayPlatformApplication::quitInternal()
 {
+    // TODO: save config when press UI confirm button
     // Do not change the order.
     ConnectionManager->StopConnection();
     RouteManager->SaveRoutes();
