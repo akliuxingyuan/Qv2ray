@@ -26,11 +26,10 @@ prepare() {
 pkgver() {
     cd "${srcdir}/Qv2ray/"
     git config --global --add safe.directory "*"
-    version=$(grep -P --only-matching '(?<=set\(QV2RAY_VERSION )[^ )]*' CMakeLists.txt)
     tag=$(git tag --sort=-version:refname | head -n1)
     count=$(git rev-list --count $tag..HEAD)
     if [[ $count > 0 ]]; then
-        printf "%s.r%s.%s" ${version} ${count} $(git rev-parse --short HEAD)
+        printf "%s.r%s.%s" ${tag} ${count} $(git rev-parse --short HEAD)
     else
         printf "%s" ${version}
     fi

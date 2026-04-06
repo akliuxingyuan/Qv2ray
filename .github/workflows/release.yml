@@ -44,6 +44,9 @@ jobs:
       - name: Git config
         run: |
           git config --global --add safe.directory '*'
+          git config --global versionsort.suffix -pre
+          git config --global versionsort.suffix -alpha
+          git config --global versionsort.suffix -rc
 
       - name: Linux - build
         if: matrix.platform == 'ubuntu-latest'
@@ -57,7 +60,6 @@ jobs:
           cp ../qv2ray-dev-* .
           echo "pkgver=$(grep --only-matching -P '(?<=pkgver=).*' ../PKGBUILD)" >> $GITHUB_ENV
           echo "pkgrel=$(grep --only-matching -P '(?<=pkgrel=).*' ../PKGBUILD)" >> $GITHUB_ENV
-
 
       - name: Upload packages
         uses: softprops/action-gh-release@v2
