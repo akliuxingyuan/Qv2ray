@@ -72,7 +72,6 @@ bool Qv2rayPlatformApplication::Initialize()
     if (isSecondary())
     {
         StartupArguments.version = QV2RAY_VERSION_STRING;
-        StartupArguments.buildVersion = QV2RAY_VERSION_BUILD;
         StartupArguments.fullArgs = arguments();
         if (StartupArguments.arguments.isEmpty())
             StartupArguments.arguments << Qv2rayStartupArguments::NORMAL;

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10.1)
 
 set(QV2RAY_VERSION 2.8.0)
-set(QV2RAY_BUILD_VERSION 8000)
 set(QV2RAY_VERSION_SUFFIX )
 
 set(QV2RAY_VERSION_STRING "${QV2RAY_VERSION}${QV2RAY_VERSION_SUFFIX}")
@@ -22,7 +21,6 @@ list(GET VERSION_LIST 2 CPACK_PACKAGE_VERSION_PATCH)
 add_definitions(-DQV2RAY_VERSION_MAJOR=${CMAKE_PROJECT_VERSION_MAJOR})
 add_definitions(-DQV2RAY_VERSION_MINOR=${CMAKE_PROJECT_VERSION_MINOR})
 add_definitions(-DQV2RAY_VERSION_BUGFIX=${CPACK_PACKAGE_VERSION_PATCH})
-add_definitions(-DQV2RAY_VERSION_BUILD=${QV2RAY_BUILD_VERSION})
 add_definitions(-DQV2RAY_VERSION_STRING="${QV2RAY_VERSION_STRING}")
 
 # Tweaks and other defaults
@@ -55,7 +53,6 @@ if(WIN32)
         VERSION_MAJOR      ${CMAKE_PROJECT_VERSION_MAJOR}
         VERSION_MINOR      ${CMAKE_PROJECT_VERSION_MINOR}
         VERSION_PATCH      ${CPACK_PACKAGE_VERSION_PATCH}
-        VERSION_REVISION   ${QV2RAY_BUILD_VERSION}
         COMPANY_NAME       "Qv2ray Workgroup"
         COMPANY_COPYRIGHT  "Qv2ray Workgroup 2021"
         FILE_DESCRIPTION   "Qv2ray Main Application"
@@ -88,7 +85,6 @@ endif()
 
 message(" ")
 message("Qv2ray Version: ${QV2RAY_VERSION_STRING}")
-message("Qv2ray Build Version: ${QV2RAY_BUILD_VERSION}")
 message("|-------------------------------------------------|")
 message("| Qv2ray, A Cross Platform v2ray Qt GUI Client.   |")
 message("| Licenced under GPLv3                            |")
@@ -240,7 +236,7 @@ if(QV2RAY_BUILD_EXTRA_INFO)
 elseif(DEFINED ENV{_QV2RAY_BUILD_EXTRA_INFO_})
     set(_QV2RAY_BUILD_EXTRA_INFO_STR_ "$ENV{_QV2RAY_BUILD_EXTRA_INFO_}")
 else()
-    set(_QV2RAY_BUILD_EXTRA_INFO_STR_ "${QV2RAY_VERSION_STRING}:${QV2RAY_BUILD_VERSION}")
+    set(_QV2RAY_BUILD_EXTRA_INFO_STR_ "${QV2RAY_VERSION_STRING}")
 endif()
 
 set(QV2RAY_BUILD_INFO ${_QV2RAY_BUILD_INFO_STR_})
@@ -461,7 +457,6 @@ endif()
 # ==================================================================================
 get_target_property(QV2RAY_BASE_LINK_LIBS qv2ray_baselib LINK_LIBRARIES)
 get_target_property(QV2RAY_EXEC_LINK_LIBS qv2ray LINK_LIBRARIES)
-QVLOG(QV2RAY_BUILD_VERSION)
 QVLOG(QV2RAY_VERSION_STRING)
 QVLOG(CMAKE_INSTALL_PREFIX)
 QVLOG(CMAKE_BINARY_DIR)

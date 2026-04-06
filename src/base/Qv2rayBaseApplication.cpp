@@ -18,7 +18,6 @@ Qv2rayApplicationInterface::Qv2rayApplicationInterface()
     DEBUG("Qv2ray Start Time: ", QTime::currentTime().msecsSinceStartOfDay());
     DEBUG("QV2RAY_BUILD_INFO", QV2RAY_BUILD_INFO);
     DEBUG("QV2RAY_BUILD_EXTRA_INFO", QV2RAY_BUILD_EXTRA_INFO);
-    DEBUG("QV2RAY_BUILD_NUMBER", QSTRN(QV2RAY_VERSION_BUILD));
     QStringList licenseList;
     licenseList << "This program comes with ABSOLUTELY NO WARRANTY.";
     licenseList << "This is free software, and you are welcome to redistribute it";

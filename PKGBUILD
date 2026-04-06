@@ -1,6 +1,5 @@
 pkgname=qv2ray-dev-git
-pkgver=2.8.0.8000.r3103.0eeab9e3
-pkgver_=2.8.0.8000
+pkgver=2.8.0
 pkgrel=1
 pkgdesc="Cross-platform V2Ray Client written in Qt (Development Release)"
 arch=('x86_64')
@@ -26,7 +25,14 @@ prepare() {
 
 pkgver() {
     cd "${srcdir}/Qv2ray/"
-    printf "%s.r%s.%s" $pkgver_ $(git rev-list --count HEAD) $(git rev-parse --short HEAD)
+    version=$(grep -P --only-matching '(?<=set\(QV2RAY_VERSION )[^ )]*' CMakeLists.txt)
+    tag=$(git tag --sort=-version:refname | head -n1)
+    count=$(git rev-list --count $tag..HEAD)
+    if [[ $count > 0 ]]; then
+        printf "%s.r%s.%s" ${version} ${count} $(git rev-parse --short HEAD)
+    else
+        printf "%s" ${version}
+    fi
 }
 
 build() {
@@ -45,7 +51,6 @@ build() {
         -DQV2RAY_DEFAULT_VCORE_PATH="/usr/bin/xray" \
         -DQV2RAY_DISABLE_AUTO_UPDATE=on \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DQV2RAY_QT6=ON \
         -GNinja
     ninja -j $(nproc)

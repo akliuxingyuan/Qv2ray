@@ -37,7 +37,6 @@ namespace Qv2ray
         };
         QList<Argument> arguments;
         QString version;
-        int buildVersion;
         QString data;
         QList<QString> links;
         QList<QString> fullArgs;
@@ -49,7 +48,7 @@ namespace Qv2ray
         bool exitQv2ray;
         //
         QString _qvNewVersionPath;
-        JSONSTRUCT_REGISTER(Qv2rayStartupArguments, F(arguments, data, version, links, fullArgs, buildVersion))
+        JSONSTRUCT_REGISTER(Qv2rayStartupArguments, F(arguments, data, version, links, fullArgs))
     };
 
     class Qv2rayApplicationInterface

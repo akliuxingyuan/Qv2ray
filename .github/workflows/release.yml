@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release-automation:
+    name: Build App
+    strategy:
+      matrix:
+        ui_type: [QWidget]
+        platform: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.platform }}
+    container: ${{ matrix.platform == 'ubuntu-latest' && 'archlinux:base-devel' || '' }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Linux - Inspect memory
+        if: matrix.platform == 'ubuntu-latest'
+        run: free -h
+
+      - name: Linux - Hack makepkg
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sed -i '/E_ROOT/d' /usr/bin/makepkg
+
+      - name: Linux - update database
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          pacman --noconfirm --noprogressbar -Sy
+          pacman --noconfirm -S git grep
+          git --version
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Git config
+        run: |
+          git config --global --add safe.directory '*'
+
+      - name: Linux - build
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          cd ../
+          mv Qv2ray/PKGBUILD .
+          sed -i 's/qv2ray-dev-git/qv2ray-dev/g' PKGBUILD
+          makepkg --noconfirm -sf
+          ls -alh
+          cd Qv2ray
+          cp ../qv2ray-dev-* .
+          echo "pkgver=$(grep --only-matching -P '(?<=pkgver=).*' ../PKGBUILD)" >> $GITHUB_ENV
+          echo "pkgrel=$(grep --only-matching -P '(?<=pkgrel=).*' ../PKGBUILD)" >> $GITHUB_ENV
+
+
+      - name: Upload packages
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            qv2ray-dev-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
+            qv2ray-dev-debug-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
+          prerelease: false
