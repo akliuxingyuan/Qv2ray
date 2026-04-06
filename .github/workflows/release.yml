@@ -53,11 +53,11 @@ jobs:
         run: |
           cd ../
           mv Qv2ray/PKGBUILD .
-          sed -i 's/qv2ray-dev-git/qv2ray-dev/g' PKGBUILD
+          sed -i 's/qv2ray-dev-git/qv2ray/g' PKGBUILD
           makepkg --noconfirm -sf
           ls -alh
           cd Qv2ray
-          cp ../qv2ray-dev-* .
+          cp ../qv2ray-* .
           echo "pkgver=$(grep --only-matching -P '(?<=pkgver=).*' ../PKGBUILD)" >> $GITHUB_ENV
           echo "pkgrel=$(grep --only-matching -P '(?<=pkgrel=).*' ../PKGBUILD)" >> $GITHUB_ENV
 
@@ -66,6 +66,6 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            qv2ray-dev-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
-            qv2ray-dev-debug-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
+            qv2ray-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
+            qv2ray-debug-${{ env.pkgver }}-${{ env.pkgrel }}-x86_64.pkg.tar.zst
           prerelease: false
