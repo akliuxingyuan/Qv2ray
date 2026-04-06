@@ -31,7 +31,7 @@ pkgver() {
     if [[ $count > 0 ]]; then
         printf "%s.r%s.%s" ${tag} ${count} $(git rev-parse --short HEAD)
     else
-        printf "%s" ${version}
+        printf "%s" ${tag}
     fi
 }
 
