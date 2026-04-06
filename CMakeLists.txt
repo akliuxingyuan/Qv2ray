@@ -34,13 +34,6 @@ if(MSVC)
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 
-if(ANDROID)
-    message("Android ABI: ${CMAKE_ANDROID_ARCH}")
-    message("Android SDK: ${ANDROID_SDK}")
-    include(cmake/platforms/android.cmake)
-    include(cmake/platforms/prefixes.cmake)
-endif()
-
 option(USE_MINGW "Use MinGW on Windows" OFF)
 
 if(WIN32)
@@ -53,6 +46,7 @@ if(WIN32)
         VERSION_MAJOR      ${CMAKE_PROJECT_VERSION_MAJOR}
         VERSION_MINOR      ${CMAKE_PROJECT_VERSION_MINOR}
         VERSION_PATCH      ${CPACK_PACKAGE_VERSION_PATCH}
+        VERSION_REVISION   0
         COMPANY_NAME       "Qv2ray Workgroup"
         COMPANY_COPYRIGHT  "Qv2ray Workgroup 2021"
         FILE_DESCRIPTION   "Qv2ray Main Application"
@@ -378,13 +372,10 @@ else()
     list(APPEND QV2RAY_UI_SOURCES ${QV2RAY_CLI_SOURCES})
 endif()
 
-# Platform Dependent Sources
-include(cmake/components/qv2ray-platform.cmake)
 include(cmake/translations.cmake)
 
 list(APPEND QV2RAY_QRC_RESOURCES
     ${CMAKE_SOURCE_DIR}/resources.qrc
-    ${CMAKE_SOURCE_DIR}/resources.new.qrc
     )
 
 set(QV2RAY_FULL_SOURCES
@@ -409,12 +400,6 @@ else()
 endif()
 
 # set_target_properties(MAIN PROPERTIES OUTPUT_NAME "qv2ray")
-
-if(ANDROID)
-    qvlog(ANDROID_EXTRA_LIBS)
-    set_property(TARGET qv2ray PROPERTY QT_ANDROID_EXTRA_LIBS ${ANDROID_EXTRA_LIBS})
-    set_property(TARGET qv2ray PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/assets/android)
-endif()
 
 target_include_directories(qv2ray PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
