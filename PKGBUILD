@@ -18,13 +18,14 @@ sha512sums=()
 prepare() {
     # dirty trick
     cd "${srcdir}"
-    ln -s ../Qv2ray Qv2ray
+    ln -sf ../Qv2ray Qv2ray
     cd Qv2ray/3rdparty/SingleApplication
     patch -Np1 < ${srcdir}/Qv2ray/singleapplication.patch
 }
 
 pkgver() {
     cd "${srcdir}/Qv2ray/"
+    git config --global --add safe.directory "*"
     version=$(grep -P --only-matching '(?<=set\(QV2RAY_VERSION )[^ )]*' CMakeLists.txt)
     tag=$(git tag --sort=-version:refname | head -n1)
     count=$(git rev-list --count $tag..HEAD)
