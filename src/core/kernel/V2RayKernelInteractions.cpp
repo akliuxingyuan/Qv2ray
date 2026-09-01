@@ -43,7 +43,7 @@ namespace Qv2ray::core::kernel
                 DEBUG("Core executable permission set.");
             }
 #endif
-            LOG("Core file not executable.");
+            QV_LOG("Core file not executable.");
             return { false, tr("Core file not executable.") };
         }
         else
@@ -78,21 +78,21 @@ namespace Qv2ray::core::kernel
         const auto [abi, err] = kernel::abi::deduceKernelABI(corePath);
         if (err)
         {
-            LOG("Core ABI deduction failed: " + *err);
+            QV_LOG("Core ABI deduction failed: " + *err);
             return { false, *err };
         }
-        LOG("Core ABI: " + kernel::abi::abiToString(*abi));
+        QV_LOG("Core ABI: " + kernel::abi::abiToString(*abi));
 
         // Get Compiled ABI
         auto compiledABI = kernel::abi::COMPILED_ABI_TYPE;
-        LOG("Host ABI: " + kernel::abi::abiToString(compiledABI));
+        QV_LOG("Host ABI: " + kernel::abi::abiToString(compiledABI));
 
         // Check ABI Compatibility.
         switch (kernel::abi::checkCompatibility(compiledABI, *abi))
         {
             case kernel::abi::ABI_NOPE:
             {
-                LOG("Host is incompatible with core");
+                QV_LOG("Host is incompatible with core");
                 const auto msg = tr("V2Ray core is incompatible with your platform.\r\n"
                                     "Expected core ABI is %1, but got actual %2.\r\n"
                                     "Maybe you have downloaded the wrong core?")
@@ -101,12 +101,12 @@ namespace Qv2ray::core::kernel
             }
             case kernel::abi::ABI_MAYBE:
             {
-                LOG("WARNING: Host maybe incompatible with core");
+                QV_LOG("WARNING: Host maybe incompatible with core");
                 break;
             }
             case kernel::abi::ABI_PERFECT:
             {
-                LOG("Host is compatible with core");
+                QV_LOG("Host is compatible with core");
                 break;
             }
         }
@@ -153,7 +153,7 @@ namespace Qv2ray::core::kernel
             return { false, tr("V2Ray core failed with an exit code: ") + QSTRN(exitCode) };
 
         const auto output = proc.readAllStandardOutput();
-        LOG("V2Ray output: " + SplitLines(output).join(";"));
+        QV_LOG("V2Ray output: " + SplitLines(output).join(";"));
 
         if (SplitLines(output).isEmpty())
             return { false, tr("V2Ray core returns empty string.") };
@@ -212,7 +212,7 @@ namespace Qv2ray::core::kernel
             // If V2Ray crashed AFTER we start it.
             if (kernelStarted && state == QProcess::NotRunning)
             {
-                LOG("V2Ray kernel crashed.");
+                QV_LOG("V2Ray kernel crashed.");
                 StopConnection();
                 emit OnProcessErrored("V2Ray kernel crashed.");
             }
@@ -228,7 +228,7 @@ namespace Qv2ray::core::kernel
     {
         if (kernelStarted)
         {
-            LOG("Status is invalid, expect STOPPED when calling StartConnection");
+            QV_LOG("Status is invalid, expect STOPPED when calling StartConnection");
             return tr("Invalid V2Ray Instance Status.");
         }
 
@@ -260,7 +260,7 @@ namespace Qv2ray::core::kernel
                     continue;
                 if (tag.isEmpty())
                 {
-                    LOG("Ignored inbound with empty tag.");
+                    QV_LOG("Ignored inbound with empty tag.");
                     continue;
                 }
                 tagProtocolMap[isOutbound][tag] = item.toObject()["protocol"].toString();
@@ -270,15 +270,15 @@ namespace Qv2ray::core::kernel
         apiEnabled = false;
         if (QvCoreApplication->StartupArguments.noAPI)
         {
-            LOG("API has been disabled by the command line arguments");
+            QV_LOG("API has been disabled by the command line arguments");
         }
         else if (!GlobalConfig.kernelConfig.enableAPI)
         {
-            LOG("API has been disabled by the global config option");
+            QV_LOG("API has been disabled by the global config option");
         }
         else if (tagProtocolMap.isEmpty())
         {
-            LOG("RARE: API is disabled since no inbound tags configured. This is usually caused by a bad complex config.");
+            QV_LOG("RARE: API is disabled since no inbound tags configured. This is usually caused by a bad complex config.");
         }
         else
         {

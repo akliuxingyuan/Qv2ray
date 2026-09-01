@@ -23,7 +23,7 @@ namespace Qv2ray::core::kernel
         this->moveToThread(workThread);
         DEBUG("API Worker initialised.");
         connect(workThread, &QThread::started, this, &APIWorker::process);
-        connect(workThread, &QThread::finished, [] { LOG("API thread stopped"); });
+        connect(workThread, &QThread::finished, [] { QV_LOG("API thread stopped"); });
         started = true;
         workThread->start();
     }
@@ -79,7 +79,7 @@ namespace Qv2ray::core::kernel
                 if (!dialed)
                 {
                     const auto channelAddress = "127.0.0.1:" + QString::number(GlobalConfig.kernelConfig.statsPort);
-                    LOG("gRPC Version: " + QString::fromStdString(grpc::Version()));
+                    QV_LOG("gRPC Version: " + QString::fromStdString(grpc::Version()));
                     grpc_channel = grpc::CreateChannel(channelAddress.toStdString(), grpc::InsecureChannelCredentials());
                     v2ray::core::app::stats::command::StatsService service;
                     stats_service_stub = service.NewStub(grpc_channel);
@@ -87,7 +87,7 @@ namespace Qv2ray::core::kernel
                 }
                 if (apiFailCounter == QV2RAY_API_CALL_FAILEDCHECK_THRESHOLD)
                 {
-                    LOG("API call failure threshold reached, cancelling further API aclls.");
+                    QV_LOG("API call failure threshold reached, cancelling further API aclls.");
                     emit OnAPIErrored(tr("Failed to get statistics data, please check if V2Ray is running properly"));
                     apiFailCounter++;
                     QThread::msleep(1000);
@@ -132,7 +132,7 @@ namespace Qv2ray::core::kernel
         const auto status = stats_service_stub->GetStats(&context, request, &response);
         if (!status.ok())
         {
-            LOG("API call returns: " + QSTRN(status.error_code()) + " (" + QString::fromStdString(status.error_message()) + ")");
+            QV_LOG("API call returns: " + QSTRN(status.error_code()) + " (" + QString::fromStdString(status.error_message()) + ")");
             return Qv2ray_GRPC_ERROR_RETCODE;
         }
         else
